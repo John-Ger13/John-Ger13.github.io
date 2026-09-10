@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Mis videos</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f4f4f4; text-align: center; }
+    #videoPlayer { width: 80%; max-width: 800px; margin: 20px auto; }
+    .video-list { list-style: none; padding: 0; }
+    .video-list li { margin: 10px 0; cursor: pointer; color: blue; }
+  </style>
+</head>
+<body>
+  <h1>Mi colección de videos</h1>
+  
+  <!-- Reproductor principal -->
+  <video id="videoPlayer" controls>
+    <source src="videos/ejemplo.mp4" type="video/mp4">
+    Tu navegador no soporta el video.
+  </video>
+  
+  <!-- Lista de videos -->
+  <ul class="video-list">
+    <li onclick="playVideo('videos/ejemplo.mp4')">Video de ejemplo</li>
+    <li onclick="playVideo('videos/otro.mp4')">Otro video</li>
+  </ul>
+  
+  <script>
+    function playVideo(src) {
+      const player = document.getElementById('videoPlayer');
+      player.src = src;
+      player.play();
+    }
+  </script>
+</body>
+</html>
