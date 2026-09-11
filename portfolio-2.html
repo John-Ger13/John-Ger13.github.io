@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mi Canal — Portafolio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0B0B10;
+    --bg-elev:#131320;
+    --bg-card:#1B1B29;
+    --accent:#5B8CFF;
+    --accent2:#C965F2;
+    --text:#EDEDF2;
+    --muted:#8A8A99;
+    --line: rgba(237,237,242,0.08);
+    --scanline: repeating-linear-gradient(180deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 3px);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto;}
+    *{animation-duration:.001ms !important; transition-duration:.001ms !important;}
+  }
+  body{
+    margin:0;
+    background:var(--bg);
+    background-image:var(--scanline);
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit;}
+
+  /* TOP BAR */
+  header{
+    position:sticky; top:0; z-index:40;
+    display:flex; align-items:center; justify-content:space-between;
+    gap:16px;
+    padding:16px 28px;
+    background:rgba(11,11,16,0.88);
+    backdrop-filter: blur(8px);
+    border-bottom:1px solid var(--line);
+  }
+  .logo{
+    font-family:'Archivo Black',sans-serif;
+    font-size:1.1rem;
+    letter-spacing:0.02em;
+    display:flex; align-items:center; gap:8px;
+  }
+  .logo .dot{width:9px; height:9px; border-radius:50%; background:var(--accent2); box-shadow:0 0 10px var(--accent2);}
+  .tabs{display:flex; gap:4px; background:var(--bg-elev); padding:4px; border-radius:8px;}
+  .tab{
+    border:none; background:transparent; color:var(--muted);
+    font-family:'Inter',sans-serif; font-size:0.85rem; font-weight:600;
+    padding:8px 16px; border-radius:6px; cursor:pointer;
+    transition:background .15s, color .15s;
+  }
+  .tab.active{background:var(--accent); color:#0B0B10;}
+  .tab:hover:not(.active), .tab:focus-visible:not(.active){color:var(--text);}
+  .header-actions{display:flex; gap:8px; align-items:center;}
+  .icon-btn{
+    background:var(--bg-elev); border:1px solid var(--line); color:var(--text);
+    width:36px; height:36px; border-radius:8px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    transition:border-color .15s;
+  }
+  .icon-btn:hover, .icon-btn:focus-visible{border-color:var(--accent);}
+  @media (max-width:640px){ .tabs{display:none;} header{padding:14px 16px;} }
+
+  /* focus ring shared */
+  .tile:focus-visible, .icon-btn:focus-visible, .btn:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible, .tab:focus-visible{
+    outline:none;
+    box-shadow: 0 0 0 3px var(--accent2), 0 0 22px rgba(201,101,242,.45);
+  }
+
+  /* HERO */
+  .hero{
+    position:relative;
+    margin:22px 28px 10px;
+    border-radius:16px;
+    overflow:hidden;
+    aspect-ratio:16/7;
+    background:var(--bg-card);
+    min-height:200px;
+  }
+  .hero-bg{
+    position:absolute; inset:0;
+    background-size:cover; background-position:center;
+    filter:saturate(1.05);
+  }
+  .hero-gradient{
+    position:absolute; inset:0;
+    background:linear-gradient(0deg, rgba(11,11,16,0.96) 5%, rgba(11,11,16,0.35) 55%, rgba(11,11,16,0.1) 100%);
+  }
+  .hero-content{
+    position:absolute; left:0; right:0; bottom:0;
+    padding:26px 30px;
+  }
+  .hero-eyebrow{
+    font-family:'Space Mono',monospace;
+    font-size:0.72rem; color:var(--accent2);
+    text-transform:uppercase; letter-spacing:.08em;
+    margin:0 0 8px;
+  }
+  .hero-title{
+    font-family:'Archivo Black',sans-serif;
+    font-size:clamp(1.5rem, 4vw, 2.6rem);
+    margin:0 0 10px;
+    max-width:20ch;
+    line-height:1.05;
+  }
+  .hero-meta{font-family:'Space Mono',monospace; font-size:0.78rem; color:var(--muted); margin:0 0 18px;}
+  .btn{
+    font-family:'Inter',sans-serif; font-weight:700; font-size:0.9rem;
+    padding:11px 22px; border-radius:8px; border:none;
+    background:var(--accent); color:#0B0B10; cursor:pointer;
+    display:inline-flex; align-items:center; gap:8px;
+    text-decoration:none;
+    transition:transform .12s, background .15s;
+  }
+  .btn:hover{background:#7AA0FF;}
+  .btn.ghost{background:var(--bg-elev); color:var(--text); border:1px solid var(--line);}
+  .btn.ghost:hover{border-color:var(--accent);}
+
+  /* ROWS / GUIDE */
+  .row-section{padding:26px 28px 4px;}
+  .row-head{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:14px;}
+  .row-head h2{font-family:'Archivo Black',sans-serif; font-size:1.05rem; margin:0; letter-spacing:.01em;}
+  .row-head .count{font-family:'Space Mono',monospace; font-size:0.72rem; color:var(--muted);}
+
+  .row-scroll{
+    display:flex; gap:16px; overflow-x:auto; padding-bottom:10px;
+    scroll-snap-type:x proximity;
+  }
+  .row-scroll::-webkit-scrollbar{height:6px;}
+  .row-scroll::-webkit-scrollbar-thumb{background:var(--line); border-radius:3px;}
+
+  .tile{
+    position:relative;
+    flex:0 0 220px;
+    scroll-snap-align:start;
+    background:var(--bg-card);
+    border-radius:10px;
+    overflow:hidden;
+    cursor:pointer;
+    border:1px solid var(--line);
+    transition:transform .15s, border-color .15s;
+  }
+  .tile:hover, .tile:focus-visible{transform:translateY(-4px) scale(1.02); border-color:rgba(91,140,255,0.4);}
+  .tile-thumb{
+    aspect-ratio:16/9; width:100%;
+    background-size:cover; background-position:center;
+    position:relative;
+  }
+  .tile-thumb .play{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    background:linear-gradient(180deg, rgba(11,11,16,0) 40%, rgba(11,11,16,0.75) 100%);
+  }
+  .tile-thumb .play svg{opacity:0; transition:opacity .15s;}
+  .tile:hover .play svg, .tile:focus-visible .play svg{opacity:1;}
+  .tile-badge{
+    position:absolute; top:8px; left:8px;
+    font-family:'Space Mono',monospace; font-size:0.62rem; text-transform:uppercase;
+    background:rgba(11,11,16,0.65); padding:3px 7px; border-radius:4px; letter-spacing:.04em;
+  }
+  .tile-delete{
+    position:absolute; top:8px; right:8px; z-index:2;
+    background:rgba(11,11,16,0.65); border:none; color:var(--text);
+    width:26px; height:26px; border-radius:6px; cursor:pointer;
+    opacity:0; display:flex; align-items:center; justify-content:center;
+    transition:opacity .15s, background .15s;
+  }
+  .tile:hover .tile-delete, .tile-delete:focus-visible{opacity:1;}
+  .tile-delete:hover, .tile-delete:focus-visible{background:var(--accent2);}
+  .tile-info{padding:10px 12px 12px;}
+  .tile-info h3{font-size:0.88rem; font-weight:600; margin:0 0 3px; line-height:1.25;}
+  .tile-info .meta{font-family:'Space Mono',monospace; font-size:0.68rem; color:var(--muted);}
+
+  /* EMPTY */
+  .empty{
+    margin:26px 28px; padding:60px 28px; text-align:center;
+    border:1px dashed var(--line); border-radius:14px; color:var(--muted);
+  }
+  .empty p{margin:0 0 16px;}
+
+  /* ADD PANEL */
+  .add-section{padding:30px 28px 80px;}
+  .add-panel{
+    margin-top:16px; display:none;
+    background:var(--bg-card); border:1px solid var(--line); border-radius:14px;
+    padding:24px;
+  }
+  .add-panel.open{display:block;}
+  .add-panel h3{font-family:'Archivo Black',sans-serif; font-size:1.1rem; margin:0 0 18px;}
+  .field-row{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px;}
+  @media (max-width:520px){.field-row{grid-template-columns:1fr;}}
+  label{display:block; font-family:'Space Mono',monospace; font-size:0.7rem; color:var(--muted); margin-bottom:6px; text-transform:uppercase; letter-spacing:.03em;}
+  input[type=text], input[type=url], textarea, select{
+    width:100%; background:#0F0F17; border:1px solid var(--line); color:var(--text);
+    padding:11px 13px; border-radius:8px; font-family:'Inter',sans-serif; font-size:0.9rem;
+  }
+  textarea{resize:vertical; min-height:70px;}
+  .field{margin-bottom:14px;}
+  .form-actions{display:flex; gap:12px; align-items:center; flex-wrap:wrap;}
+  .form-msg{font-family:'Space Mono',monospace; font-size:0.78rem; color:var(--accent);}
+
+  footer{
+    padding:30px 28px 50px; border-top:1px solid var(--line);
+    color:var(--muted); font-size:0.8rem;
+    display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px;
+  }
+
+  /* PLAYER OVERLAY */
+  .player{
+    position:fixed; inset:0; background:rgba(6,6,9,0.96); z-index:100;
+    display:none; flex-direction:column; align-items:center; justify-content:center; padding:26px;
+  }
+  .player.open{display:flex;}
+  .player-inner{width:100%; max-width:960px;}
+  .player-media{position:relative; width:100%; aspect-ratio:16/9; background:#000; border-radius:10px; overflow:hidden;}
+  .player-media iframe, .player-media video{width:100%; height:100%; border:0; display:block;}
+  .player-body{padding:20px 4px 0;}
+  .player-body h3{font-family:'Archivo Black',sans-serif; font-size:1.3rem; margin:0 0 6px;}
+  .player-meta{font-family:'Space Mono',monospace; font-size:0.75rem; color:var(--muted); margin-bottom:12px;}
+  .player-desc{font-size:0.92rem; line-height:1.6; color:#D0D0DC;}
+  .player-close{
+    position:absolute; top:14px; right:14px; z-index:5;
+    background:rgba(11,11,16,0.6); border:none; color:var(--text);
+    width:36px; height:36px; border-radius:8px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .player-close:hover, .player-close:focus-visible{background:var(--accent2);}
+
+  input#importFile{display:none;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo"><span class="dot"></span> Mi Canal</div>
+  <div class="tabs" role="tablist" aria-label="Filtrar por tipo">
+    <button class="tab active" data-filter="all">Todo</button>
+    <button class="tab" data-filter="video">Video</button>
+    <button class="tab" data-filter="foto">Fotografía</button>
+  </div>
+  <div class="header-actions">
+    <button class="icon-btn" id="exportBtn" title="Exportar respaldo" aria-label="Exportar respaldo">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1V10M8 10L4.5 6.5M8 10L11.5 6.5M2 12.5V13.5C2 14 2.5 14.5 3 14.5H13C13.5 14.5 14 14 14 13.5V12.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <button class="icon-btn" id="importBtn" title="Importar respaldo" aria-label="Importar respaldo">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 10V1M8 1L4.5 4.5M8 1L11.5 4.5M2 12.5V13.5C2 14 2.5 14.5 3 14.5H13C13.5 14.5 14 14 14 13.5V12.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <input type="file" id="importFile" accept="application/json">
+  </div>
+</header>
+
+<div id="heroWrap"></div>
+
+<div id="rowsWrap"></div>
+
+<div id="emptyState" class="empty" style="display:none;">
+  <p>Tu canal está vacío todavía.</p>
+  <a href="#agregar" class="btn">+ Agregar tu primer programa</a>
+</div>
+
+<section class="add-section" id="agregar">
+  <button class="btn ghost" id="toggleAdd" aria-expanded="false" aria-controls="addPanel">+ Agregar programa</button>
+
+  <form class="add-panel" id="addPanel">
+    <h3>Nuevo programa</h3>
+    <div class="field-row">
+      <div class="field">
+        <label for="fTitle">Título</label>
+        <input type="text" id="fTitle" required maxlength="80" placeholder="Nombre del proyecto">
+      </div>
+      <div class="field">
+        <label for="fYear">Año</label>
+        <input type="text" id="fYear" maxlength="9" placeholder="2026">
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label for="fType">Tipo</label>
+        <select id="fType">
+          <option value="video">Video</option>
+          <option value="foto">Fotografía</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="fUrl">Enlace (YouTube, Vimeo, Drive, OneDrive o Dropbox)</label>
+        <input type="url" id="fUrl" required placeholder="https://youtube.com/watch?v=...">
+      </div>
+    </div>
+    <div class="field">
+      <label for="fDesc">Descripción</label>
+      <textarea id="fDesc" maxlength="400" placeholder="Notas sobre el proyecto..."></textarea>
+    </div>
+    <div class="form-actions">
+      <button type="submit" class="btn">Guardar</button>
+      <button type="button" class="btn ghost" id="cancelAdd">Cancelar</button>
+      <span class="form-msg" id="formMsg"></span>
+    </div>
+  </form>
+</section>
+
+<footer>
+  <span>Mi Canal — portafolio personal</span>
+  <span>Uso privado · no indexado</span>
+</footer>
+
+<div class="player" id="player" role="dialog" aria-modal="true" aria-labelledby="pTitle">
+  <div class="player-inner">
+    <div class="player-media" id="pMedia">
+      <button class="player-close" id="pClose" aria-label="Cerrar">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M1 1L15 15M15 1L1 15" stroke="currentColor" stroke-width="1.6"/></svg>
+      </button>
+    </div>
+    <div class="player-body">
+      <h3 id="pTitle"></h3>
+      <div class="player-meta" id="pMeta"></div>
+      <div class="player-desc" id="pDesc"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'mi-canal-entries';
+let entries = [];
+let currentFilter = 'all';
+
+const TONES = ['#5B8CFF','#C965F2','#3E7A6B','#B15C4C','#4C5A9C','#8A5A9C'];
+function toneFor(str){
+  let sum=0; for(let i=0;i<str.length;i++) sum+=str.charCodeAt(i);
+  return TONES[sum % TONES.length];
+}
+
+function parseVideoUrl(raw){
+  const url = raw.trim();
+  try{
+    const u = new URL(url);
+    let ytId = null;
+    if (u.hostname.includes('youtu.be')) ytId = u.pathname.slice(1);
+    else if (u.hostname.includes('youtube.com')){
+      if (u.pathname === '/watch') ytId = u.searchParams.get('v');
+      else if (u.pathname.startsWith('/embed/')) ytId = u.pathname.split('/embed/')[1];
+      else if (u.pathname.startsWith('/shorts/')) ytId = u.pathname.split('/shorts/')[1];
+    }
+    if (ytId){
+      ytId = ytId.split('&')[0].split('?')[0];
+      return { type:'youtube', embed:`https://www.youtube.com/embed/${ytId}`, thumb:`https://i.ytimg.com/vi/${ytId}/hqdefault.jpg` };
+    }
+    if (u.hostname.includes('vimeo.com')){
+      const m = u.pathname.match(/(\d+)/);
+      if (m) return { type:'vimeo', embed:`https://player.vimeo.com/video/${m[1]}`, thumb:null };
+    }
+    if (u.hostname.includes('drive.google.com')){
+      const m = u.pathname.match(/\/d\/([^/]+)/);
+      if (m) return { type:'drive', embed:`https://drive.google.com/file/d/${m[1]}/preview`, thumb:null };
+    }
+    if (u.hostname.includes('1drv.ms') || u.hostname.includes('onedrive.live.com') || u.hostname.includes('sharepoint.com')){
+      const b64 = btoa(url).replace(/=/g,'').replace(/\//g,'_').replace(/\+/g,'-');
+      return { type:'direct', embed:`https://api.onedrive.com/v1.0/shares/u!${b64}/root/content`, thumb:null };
+    }
+    if (u.hostname.includes('dropbox.com')){
+      u.hostname = 'dl.dropboxusercontent.com';
+      u.searchParams.delete('dl');
+      u.searchParams.set('raw','1');
+      return { type:'direct', embed:u.toString(), thumb:null };
+    }
+    if (/\.(mp4|webm|mov|ogg)$/i.test(u.pathname)){
+      return { type:'direct', embed:url, thumb:null };
+    }
+    return { type:'other', embed:url, thumb:null };
+  }catch(e){
+    return { type:'other', embed:url, thumb:null };
+  }
+}
+
+function mediaHtml(info, autoplay){
+  if (info.type === 'youtube'){
+    return `<iframe src="${info.embed}${autoplay?'?autoplay=1':''}" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen title="reproductor de video"></iframe>`;
+  }
+  if (info.type === 'vimeo'){
+    return `<iframe src="${info.embed}${autoplay?'?autoplay=1':''}" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen title="reproductor de video"></iframe>`;
+  }
+  if (info.type === 'drive'){
+    return `<iframe src="${info.embed}" allow="autoplay" allowfullscreen title="reproductor de video"></iframe>`;
+  }
+  if (info.type === 'direct'){
+    return `<video src="${info.embed}" controls ${autoplay?'autoplay':''} playsinline></video>`;
+  }
+  return `<iframe src="${info.embed}" allowfullscreen title="reproductor de video"></iframe>`;
+}
+
+function loadEntries(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    entries = raw ? JSON.parse(raw) : [];
+  }catch(e){ entries = []; }
+  render();
+}
+function saveEntries(){
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+  }catch(e){
+    console.error(e);
+    alert('No se pudo guardar en este navegador. Exporta un respaldo para no perder tus datos.');
+  }
+}
+
+function escapeHtml(s){ const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+
+function tileHtml(e, idx){
+  const info = parseVideoUrl(e.url);
+  const thumbStyle = info.thumb ? `background-image:url('${info.thumb}')` : `background-color:${toneFor(e.title||'x')}`;
+  return `
+    <div class="tile" tabindex="0" role="button" data-idx="${idx}" aria-label="Reproducir ${escapeHtml(e.title)}">
+      <span class="tile-badge">${e.type === 'foto' ? 'Foto' : 'Video'}</span>
+      <button class="tile-delete" data-del="${idx}" aria-label="Eliminar ${escapeHtml(e.title)}">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M2 4H14M6 4V2.5C6 2 6.5 1.5 7 1.5H9C9.5 1.5 10 2 10 2.5V4M12.5 4L12 13.5C12 14 11.5 14.5 11 14.5H5C4.5 14.5 4 14 4 13.5L3.5 4" stroke="currentColor" stroke-width="1.3"/></svg>
+      </button>
+      <div class="tile-thumb" style="${thumbStyle}">
+        <span class="play">
+          <svg width="34" height="34" viewBox="0 0 40 40"><circle cx="20" cy="20" r="19" fill="rgba(11,11,16,0.55)" stroke="rgba(237,237,242,0.6)"/><path d="M16 13L28 20L16 27V13Z" fill="#EDEDF2"/></svg>
+        </span>
+      </div>
+      <div class="tile-info">
+        <h3>${escapeHtml(e.title)}</h3>
+        <div class="meta">${escapeHtml(e.year || '—')}</div>
+      </div>
+    </div>
+  `;
+}
+
+function render(){
+  const heroWrap = document.getElementById('heroWrap');
+  const rowsWrap = document.getElementById('rowsWrap');
+  const empty = document.getElementById('emptyState');
+
+  if (entries.length === 0){
+    heroWrap.innerHTML = '';
+    rowsWrap.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  const featured = entries[0];
+  const finfo = parseVideoUrl(featured.url);
+  const heroBg = finfo.thumb ? `background-image:url('${finfo.thumb}')` : `background-color:${toneFor(featured.title)}`;
+  heroWrap.innerHTML = `
+    <div class="hero">
+      <div class="hero-bg" style="${heroBg}"></div>
+      <div class="hero-gradient"></div>
+      <div class="hero-content">
+        <p class="hero-eyebrow">Recién agregado</p>
+        <h1 class="hero-title">${escapeHtml(featured.title)}</h1>
+        <p class="hero-meta">${featured.type === 'foto' ? 'Fotografía' : 'Video'} · ${escapeHtml(featured.year || 'sin fecha')}</p>
+        <button class="btn" id="heroPlay" data-idx="0">▶ Reproducir</button>
+      </div>
+    </div>
+  `;
+  document.getElementById('heroPlay').addEventListener('click', () => openPlayer(0));
+
+  const videos = entries.map((e,i)=>({e,i})).filter(x => x.e.type !== 'foto');
+  const fotos = entries.map((e,i)=>({e,i})).filter(x => x.e.type === 'foto');
+
+  let html = '';
+  if (currentFilter !== 'foto' && videos.length){
+    html += `
+      <div class="row-section">
+        <div class="row-head"><h2>Video</h2><span class="count">${videos.length}</span></div>
+        <div class="row-scroll">${videos.map(x => tileHtml(x.e, x.i)).join('')}</div>
+      </div>`;
+  }
+  if (currentFilter !== 'video' && fotos.length){
+    html += `
+      <div class="row-section">
+        <div class="row-head"><h2>Fotografía</h2><span class="count">${fotos.length}</span></div>
+        <div class="row-scroll">${fotos.map(x => tileHtml(x.e, x.i)).join('')}</div>
+      </div>`;
+  }
+  rowsWrap.innerHTML = html;
+
+  rowsWrap.querySelectorAll('.tile').forEach(el => {
+    const idx = parseInt(el.dataset.idx, 10);
+    el.addEventListener('click', (ev) => {
+      if (ev.target.closest('[data-del]')) return;
+      openPlayer(idx);
+    });
+    el.addEventListener('keydown', (ev) => {
+      if ((ev.key === 'Enter' || ev.key === ' ') && !ev.target.closest('[data-del]')){
+        ev.preventDefault();
+        openPlayer(idx);
+      }
+    });
+  });
+  rowsWrap.querySelectorAll('[data-del]').forEach(btn => {
+    btn.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      const idx = parseInt(btn.dataset.del, 10);
+      const e = entries[idx];
+      if (confirm(`¿Eliminar "${e.title}" de tu canal?`)){
+        entries.splice(idx,1);
+        saveEntries();
+        render();
+      }
+    });
+  });
+}
+
+function openPlayer(idx){
+  const e = entries[idx];
+  const info = parseVideoUrl(e.url);
+  document.getElementById('pMedia').innerHTML =
+    `<button class="player-close" id="pClose" aria-label="Cerrar"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M1 1L15 15M15 1L1 15" stroke="currentColor" stroke-width="1.6"/></svg></button>` +
+    mediaHtml(info, true);
+  document.getElementById('pTitle').textContent = e.title;
+  document.getElementById('pMeta').textContent = `${e.type === 'foto' ? 'Fotografía' : 'Video'} · ${e.year || 'sin fecha'}`;
+  document.getElementById('pDesc').textContent = e.description || '';
+  document.getElementById('player').classList.add('open');
+  document.getElementById('pClose').addEventListener('click', closePlayer);
+  document.body.style.overflow = 'hidden';
+}
+function closePlayer(){
+  document.getElementById('player').classList.remove('open');
+  document.getElementById('pMedia').innerHTML = '';
+  document.body.style.overflow = '';
+}
+document.getElementById('player').addEventListener('click', (ev) => {
+  if (ev.target.id === 'player') closePlayer();
+});
+document.addEventListener('keydown', (ev) => {
+  if (ev.key === 'Escape') closePlayer();
+});
+
+/* remote-style arrow navigation across tiles */
+function getTiles(){
+  return Array.from(document.querySelectorAll('.tile, #heroPlay'));
+}
+document.addEventListener('keydown', (ev) => {
+  const tag = (document.activeElement.tagName || '').toLowerCase();
+  if (['input','textarea','select'].includes(tag)) return;
+  if (!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(ev.key)) return;
+  const tiles = getTiles();
+  if (!tiles.length) return;
+  let idx = tiles.indexOf(document.activeElement);
+  if (idx === -1){ tiles[0].focus(); ev.preventDefault(); return; }
+  const cur = tiles[idx].getBoundingClientRect();
+  ev.preventDefault();
+  if (ev.key === 'ArrowRight') idx = Math.min(idx+1, tiles.length-1);
+  else if (ev.key === 'ArrowLeft') idx = Math.max(idx-1, 0);
+  else {
+    const down = ev.key === 'ArrowDown';
+    let best=null, bestDist=Infinity;
+    tiles.forEach((t,i) => {
+      const r = t.getBoundingClientRect();
+      const isCandidate = down ? r.top > cur.top + 5 : r.top < cur.top - 5;
+      if (isCandidate){
+        const dist = Math.abs(r.left-cur.left) + Math.abs(r.top-cur.top)*0.05;
+        if (dist < bestDist){ bestDist = dist; best = i; }
+      }
+    });
+    if (best !== null) idx = best;
+  }
+  tiles[idx].focus();
+});
+
+/* filter tabs */
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    currentFilter = tab.dataset.filter;
+    render();
+  });
+});
+
+/* add panel */
+const toggleAdd = document.getElementById('toggleAdd');
+const addPanel = document.getElementById('addPanel');
+toggleAdd.addEventListener('click', () => {
+  const isOpen = addPanel.classList.toggle('open');
+  toggleAdd.setAttribute('aria-expanded', isOpen);
+});
+document.getElementById('cancelAdd').addEventListener('click', () => {
+  addPanel.classList.remove('open');
+  toggleAdd.setAttribute('aria-expanded','false');
+  addPanel.reset();
+});
+addPanel.addEventListener('submit', (ev) => {
+  ev.preventDefault();
+  const title = document.getElementById('fTitle').value.trim();
+  const year = document.getElementById('fYear').value.trim();
+  const type = document.getElementById('fType').value;
+  const url = document.getElementById('fUrl').value.trim();
+  const description = document.getElementById('fDesc').value.trim();
+  const msg = document.getElementById('formMsg');
+  if (!title || !url){ msg.textContent = 'Falta título o enlace.'; return; }
+  entries.unshift({ title, year, type, url, description });
+  saveEntries();
+  render();
+  addPanel.reset();
+  addPanel.classList.remove('open');
+  toggleAdd.setAttribute('aria-expanded','false');
+  msg.textContent = '';
+});
+
+/* export / import */
+document.getElementById('exportBtn').addEventListener('click', () => {
+  const blob = new Blob([JSON.stringify(entries, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'mi-canal-respaldo.json'; a.click();
+  URL.revokeObjectURL(url);
+});
+document.getElementById('importBtn').addEventListener('click', () => {
+  document.getElementById('importFile').click();
+});
+document.getElementById('importFile').addEventListener('change', (ev) => {
+  const file = ev.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try{
+      const imported = JSON.parse(reader.result);
+      if (!Array.isArray(imported)) throw new Error('formato inválido');
+      entries = imported;
+      saveEntries();
+      render();
+    }catch(e){
+      alert('El archivo de respaldo no es válido.');
+    }
+  };
+  reader.readAsText(file);
+});
+
+loadEntries();
+</script>
+
+</body>
+</html>
