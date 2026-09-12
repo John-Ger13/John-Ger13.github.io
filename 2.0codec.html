@@ -1,0 +1,341 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Streaming Personal</title>
+    <style>
+        :root {
+            --bg-color: #0f1015;
+            --panel-color: #1a1c23;
+            --accent-color: #e50914;
+            --text-color: #ffffff;
+            --text-secondary: #a7a7a7;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Sidebar de Temporadas y Episodios */
+        sidebar {
+            width: 350px;
+            background-color: var(--panel-color);
+            border-right: 1px solid #2a2d3d;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-bottom: 1px solid #2a2d3d;
+            background: #14161b;
+        }
+
+        .seasons-container {
+            overflow-y: auto;
+            flex: 1;
+            padding: 15px;
+        }
+
+        /* Estilo de Acordeón para Temporadas */
+        details {
+            background: #222530;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            overflow: hidden;
+            border: 1px solid #2f3342;
+        }
+
+        summary {
+            padding: 12px 15px;
+            font-weight: bold;
+            cursor: pointer;
+            user-select: none;
+            outline: none;
+            transition: background 0.2s;
+        }
+
+        summary:hover {
+            background: #2a2e3d;
+        }
+
+        .episode-list {
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            background: #181a22;
+        }
+
+        .episode-btn {
+            background: #252836;
+            border: none;
+            color: var(--text-color);
+            padding: 8px 12px;
+            text-align: left;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.2s, transform 0.1s;
+        }
+
+        .episode-btn:hover {
+            background: var(--accent-color);
+        }
+
+        .episode-btn.active {
+            background: var(--accent-color);
+            font-weight: bold;
+        }
+
+        /* Área Principal del Reproductor */
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
+            background: radial-gradient(circle at center, #1b1e29 0%, #0f1015 100%);
+        }
+
+        .player-wrapper {
+            width: 100%;
+            max-width: 900px;
+            background: #000;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        video {
+            width: 100%;
+            max-height: 550px;
+            display: block;
+        }
+
+        .player-info {
+            padding: 20px;
+            background: var(--panel-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .player-info h2 {
+            margin: 0 0 5px 0;
+            font-size: 1.4rem;
+        }
+
+        .player-info p {
+            margin: 0;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        /* Controles de Audio personalizados extra */
+        .audio-switcher {
+            display: flex;
+            gap: 10px;
+        }
+
+        .lang-btn {
+            background: #333849;
+            border: 1px solid #484f66;
+            color: white;
+            padding: 6px 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .lang-btn.active {
+            background: var(--accent-color);
+            border-color: var(--accent-color);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- SIDEBAR: Aquí configuras las 31 temporadas y episodios -->
+    <sidebar>
+        <div class="sidebar-header">🎬 Mi Streaming Personal</div>
+        <div class="seasons-container" id="seasonsContainer">
+            <!-- JavaScript inyectará las temporadas aquí automáticamente -->
+        </div>
+    </sidebar>
+
+    <!-- REPRODUCTOR WEB -->
+    <main>
+        <div class="player-wrapper">
+            <!-- Etiqueta de video con soporte para subtítulos -->
+            <video id="mainVideo" controls crossorigin="anonymous">
+                <track id="subtrack" kind="subtitles" srclang="es" label="Español" default>
+                Tu navegador no soporta el elemento de video.
+            </video>
+            
+            <!-- Etiqueta de audio secundaria oculta para sincronizar el MP3 en Español Latino -->
+            <audio id="latinoAudio" preload="auto"></audio>
+
+            <div class="player-info">
+                <div>
+                    <h2 id="currentTitle">Selecciona un episodio</h2>
+                    <p id="currentSub">Temporada y Episodio</p>
+                </div>
+                <div class="audio-switcher">
+                    <button class="lang-btn active" onclick="changeAudioLang('latino')">Latino (MP3)</button>
+                    <button class="lang-btn" onclick="changeAudioLang('english')">Inglés (Video)</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // ==========================================
+        // BASE DE DATOS LOCAL DE TU STREAMING
+        // ==========================================
+        // Aquí puedes agregar tus 31 temporadas fácilmente.
+        // Pones el link del video de Drive/OneDrive, el link del MP3 en español y los subtítulos (.vtt)
+        const database = {
+            "Temporada 1": [
+                {
+                    ep: "T1E1",
+                    title: "Episodio 1: Piloto",
+                    videoUrl: "https://www.dropbox.com/scl/fi/av1or33geb4c0dodtkcij/AAZaa0WD5KtzVb_iK0RG5LM/thanksgiving%20of%20horror.mkv?rlkey=iq5091uylqado9mom1mopxd5z&raw=1.mp4",
+                    audioLatinoUrl: "https://www.dropbox.com/scl/fi/av1or33geb4c0dodtkcij/AHXDBm1ZERqoIi_fvKRHLD0/Eng-thanksgiving%20of%20horror.mkv3.aac?rlkey=iq5091uylqado9mom1mopxd5z&raw=1.mp3",
+                    subtitleUrl: "https://www.dropbox.com/scl/fi/av1or33geb4c0dodtkcij/AHNPPPaj_98NlRI_8PTeEyg/%28Eng-Subtitles%29The%20Simpsons%5BThanksgiving%20of%20horror%5DS31%20E08.First%20caption.srt?rlkey=iq5091uylqado9mom1mopxd5z&dl=0.srt"
+                },
+                {
+                    ep: "T1E2",
+                    title: "Episodio 2: El comienzo",
+                    videoUrl: "URL_VIDEO_T1E2.mp4",
+                    audioLatinoUrl: "URL_AUDIO_MP3_T1E2.mp3",
+                    subtitleUrl: "URL_SUBS_T1E2.vtt"
+                }
+            ],
+            "Temporada 2": [
+                {
+                    ep: "T2E1",
+                    title: "Episodio 1: Regreso",
+                    videoUrl: "URL_VIDEO_T2E1.mp4",
+                    audioLatinoUrl: "URL_AUDIO_MP3_T2E1.mp3",
+                    subtitleUrl: "URL_SUBS_T2E1.vtt"
+                }
+            ]
+            // Puedes seguir agregando hasta la Temporada 31 de la misma forma...
+        };
+
+        const videoElem = document.getElementById('mainVideo');
+        const audioLatino = document.getElementById('latinoAudio');
+        const subTrackElem = document.getElementById('subtrack');
+        const currentTitle = document.getElementById('currentTitle');
+        const currentSub = document.getElementById('currentSub');
+        
+        let currentLang = 'latino'; // Por defecto arranca en latino usando el MP3
+        let activeEpisodeData = null;
+
+        // Generar la interfaz de temporadas y episodios automáticamente
+        function renderSidebar() {
+            const container = document.getElementById('seasonsContainer');
+            container.innerHTML = "";
+
+            for (let season in database) {
+                let details = document.createElement('details');
+                // Si quieres que la temporada 1 empiece abierta por defecto, puedes agregar "open"
+                if(season === "Temporada 1") details.open = true;
+
+                let summary = document.createElement('summary');
+                summary.innerText = season;
+                details.appendChild(summary);
+
+                let listDiv = document.createElement('div');
+                listDiv.className = 'episode-list';
+
+                database[season].forEach(epData => {
+                    let btn = document.createElement('button');
+                    btn.className = 'episode-btn';
+                    btn.innerText = `${epData.ep}: ${epData.title}`;
+                    btn.onclick = () => loadEpisode(epData, btn);
+                    listDiv.appendChild(btn);
+                });
+
+                details.appendChild(listDiv);
+                container.appendChild(details);
+            }
+        }
+
+        // Cargar un episodio al reproductor
+        function loadEpisode(epData, buttonElem) {
+            activeEpisodeData = epData;
+
+            // Marcar botón activo visualmente
+            document.querySelectorAll('.episode-btn').forEach(b => b.classList.remove('active'));
+            buttonElem.classList.add('active');
+
+            // Actualizar textos
+            currentTitle.innerText = epData.title;
+            currentSub.innerText = epData.ep;
+
+            // Configurar Fuentes
+            videoElem.src = epData.videoUrl;
+            audioLatino.src = epData.audioLatinoUrl;
+            subTrackElem.src = epData.subtitleUrl;
+
+            // Ajustar volumen del video base si usamos audio externo
+            updateAudioMode();
+
+            videoElem.load();
+            audioLatino.load();
+            videoElem.play();
+            audioLatino.play();
+        }
+
+        // Sincronizar reproducción, pausa y adelantos entre el Video y el MP3 de Latino
+        videoElem.onplay = () => { if(currentLang === 'latino') audioLatino.play(); };
+        videoElem.onpause = () => { audioLatino.pause(); };
+        videoElem.onseeking = () => { audioLatino.currentTime = videoElem.currentTime; };
+        videoElem.onratechange = () => { audioLatino.playbackRate = videoElem.playbackRate; };
+
+        // Cambiar entre Audio Latino (MP3) e Inglés (Video Original)
+        function changeAudioLang(lang) {
+            currentLang = lang;
+            document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+            
+            if(lang === 'latino') {
+                event.target.classList.add('active');
+                audioLatino.muted = false;
+                videoElem.muted = true; // Silenciamos el video original y dejamos sonar el MP3
+                if(!videoElem.paused) audioLatino.play();
+            } else {
+                event.target.classList.add('active');
+                audioLatino.muted = true;
+                videoElem.muted = false; // Escuchamos el audio original del video
+                audioLatino.pause();
+            }
+        }
+
+        function updateAudioMode() {
+            if(currentLang === 'latino') {
+                audioLatino.muted = false;
+                videoElem.muted = true;
+            } else {
+                audioLatino.muted = true;
+                videoElem.muted = false;
+            }
+        }
+
+        // Inicializar el menú al cargar la página
+        renderSidebar();
+    </script>
+</body>
+</html>
