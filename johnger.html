@@ -1,0 +1,2269 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>John Springfield — Portfolio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/video.js/8.10.0/video-js.min.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/video.js/8.10.0/video.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{
+    --bg:#0B0B10;
+    --bg-elev:#131320;
+    --bg-card:#1B1B29;
+    --accent:#5B8CFF;
+    --accent2:#C965F2;
+    --text:#FFD90F;
+    --muted:#8A8A99;
+    --line: rgba(237,237,242,0.08);
+    --scanline: repeating-linear-gradient(180deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 3px);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto;}
+    *{animation-duration:.001ms !important; transition-duration:.001ms !important;}
+  }
+  html{ overflow-x:hidden; }
+  body{
+    margin:0;
+    background:var(--bg);
+    background-image:var(--scanline);
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+    max-width:100vw;
+  }
+  a{color:inherit;}
+
+  /* TOP BAR */
+  header{
+    position:sticky; top:0; z-index:40;
+    display:flex; align-items:center; justify-content:space-between;
+    flex-wrap:wrap;
+    gap:10px;
+    padding:12px 16px;
+    background:rgba(11,11,16,0.88);
+    backdrop-filter: blur(8px);
+    border-bottom:1px solid var(--line);
+  }
+  .logo{
+    font-family:'Archivo Black',sans-serif;
+    font-size:1.1rem;
+    letter-spacing:0.02em;
+    display:flex; align-items:center; gap:8px;
+  }
+  .logo .dot{width:9px; height:9px; border-radius:50%; background:var(--accent2); box-shadow:0 0 10px var(--accent2);}
+  .tabs{display:flex; gap:4px; background:var(--bg-elev); padding:4px; border-radius:8px;}
+  .tab{
+    border:none; background:transparent; color:var(--muted);
+    font-family:'Inter',sans-serif; font-size:0.85rem; font-weight:600;
+    padding:8px 16px; border-radius:6px; cursor:pointer;
+    transition:background .15s, color .15s;
+  }
+  .tab.active{background:var(--accent); color:#0B0B10;}
+  .tab:hover:not(.active), .tab:focus-visible:not(.active){color:var(--text);}
+  .header-actions{display:flex; gap:8px; align-items:center;}
+  .icon-btn{
+    background:var(--bg-elev); border:1px solid var(--line); color:var(--text);
+    width:36px; height:36px; border-radius:8px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    transition:border-color .15s;
+  }
+  .icon-btn:hover, .icon-btn:focus-visible{border-color:var(--accent);}
+  @media (max-width:640px){
+    .tabs{ display:none; }
+    header{ padding:10px 14px; gap:8px; }
+    .logo{ font-size:0.95rem; }
+    #randomBtn{ padding:8px 10px; font-size:0.78rem; }
+    .icon-btn{ width:32px; height:32px; }
+  }
+
+  /* focus ring shared */
+  .tile:focus-visible, .icon-btn:focus-visible, .btn:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible, .tab:focus-visible{
+    outline:none;
+    box-shadow: 0 0 0 3px var(--accent2), 0 0 22px rgba(201,101,242,.45);
+  }
+
+  /* HERO */
+  .hero{
+    position:relative;
+    margin:22px 28px 10px;
+    border-radius:16px;
+    overflow:hidden;
+    aspect-ratio:16/7;
+    background:var(--bg-card);
+    min-height:200px;
+  }
+  .hero-bg{
+    position:absolute; inset:0;
+    background-size:cover; background-position:center;
+    filter:saturate(1.05);
+  }
+  .hero-gradient{
+    position:absolute; inset:0;
+    background:linear-gradient(0deg, rgba(11,11,16,0.96) 5%, rgba(11,11,16,0.35) 55%, rgba(11,11,16,0.1) 100%);
+  }
+  .hero-content{
+    position:absolute; left:0; right:0; bottom:0;
+    padding:26px 30px;
+  }
+  .hero-eyebrow{
+    font-family:'Space Mono',monospace;
+    font-size:0.72rem; color:var(--accent2);
+    text-transform:uppercase; letter-spacing:.08em;
+    margin:0 0 8px;
+  }
+  .hero-title{
+    font-family:'Archivo Black',sans-serif;
+    font-size:clamp(1.5rem, 4vw, 2.6rem);
+    margin:0 0 10px;
+    max-width:20ch;
+    line-height:1.05;
+  }
+  .hero-meta{font-family:'Space Mono',monospace; font-size:0.78rem; color:var(--muted); margin:0 0 18px;}
+  .btn{
+    font-family:'Inter',sans-serif; font-weight:700; font-size:0.9rem;
+    padding:11px 22px; border-radius:8px; border:none;
+    background:var(--accent); color:#0B0B10; cursor:pointer;
+    display:inline-flex; align-items:center; gap:8px;
+    text-decoration:none;
+    transition:transform .12s, background .15s;
+  }
+  .btn:hover{background:#7AA0FF;}
+  .btn.ghost{background:var(--bg-elev); color:var(--text); border:1px solid var(--line);}
+  .btn.ghost:hover{border-color:var(--accent);}
+
+  /* ROWS / GUIDE */
+  .row-section{padding:26px 28px 4px;}
+  .row-head{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:14px;}
+  .row-head h2{font-family:'Archivo Black',sans-serif; font-size:1.05rem; margin:0; letter-spacing:.01em;}
+  .row-head .count{font-family:'Space Mono',monospace; font-size:0.72rem; color:var(--muted);}
+
+  .row-scroll{
+    display:flex; gap:16px; overflow-x:auto; padding-bottom:10px;
+    scroll-snap-type:x proximity;
+  }
+  .row-scroll::-webkit-scrollbar{height:6px;}
+  .row-scroll::-webkit-scrollbar-thumb{background:var(--line); border-radius:3px;}
+
+  .tile{
+    position:relative;
+    flex:0 0 220px;
+    scroll-snap-align:start;
+    background:var(--bg-card);
+    border-radius:10px;
+    overflow:hidden;
+    cursor:pointer;
+    border:1px solid var(--line);
+    transition:transform .15s, border-color .15s;
+  }
+  .tile:hover, .tile:focus-visible{transform:translateY(-4px) scale(1.02); border-color:rgba(91,140,255,0.4);}
+  .tile-thumb{
+    aspect-ratio:16/9; width:100%;
+    background-size:cover; background-position:center;
+    position:relative;
+  }
+  .tile-thumb .play{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    background:linear-gradient(180deg, rgba(11,11,16,0) 40%, rgba(11,11,16,0.75) 100%);
+  }
+  .tile-thumb .play svg{opacity:0; transition:opacity .15s;}
+  .tile:hover .play svg, .tile:focus-visible .play svg{opacity:1;}
+  .tile-badge{
+    position:absolute; top:8px; left:8px;
+    font-family:'Space Mono',monospace; font-size:0.62rem; text-transform:uppercase;
+    background:rgba(11,11,16,0.65); padding:3px 7px; border-radius:4px; letter-spacing:.04em;
+  }
+  .tile-delete{
+    position:absolute; top:8px; right:8px; z-index:2;
+    background:rgba(11,11,16,0.65); border:none; color:var(--text);
+    width:26px; height:26px; border-radius:6px; cursor:pointer;
+    opacity:0; display:flex; align-items:center; justify-content:center;
+    transition:opacity .15s, background .15s;
+  }
+  .tile:hover .tile-delete, .tile-delete:focus-visible{opacity:1;}
+  .tile-delete:hover, .tile-delete:focus-visible{background:var(--accent2);}
+  .tile-info{padding:10px 12px 12px;}
+  .tile-info h3{font-size:0.88rem; font-weight:600; margin:0 0 3px; line-height:1.25;}
+  .tile-info .meta{font-family:'Space Mono',monospace; font-size:0.68rem; color:var(--muted);}
+
+  /* EMPTY */
+  .empty{
+    margin:26px 28px; padding:60px 28px; text-align:center;
+    border:1px dashed var(--line); border-radius:14px; color:var(--muted);
+  }
+  .empty p{margin:0 0 16px;}
+
+  /* ADD PANEL */
+  .add-section{padding:30px 28px 80px;}
+  .add-panel{
+    margin-top:16px; display:none;
+    background:var(--bg-card); border:1px solid var(--line); border-radius:14px;
+    padding:24px;
+  }
+  .add-panel.open{display:block;}
+  .add-panel h3{font-family:'Archivo Black',sans-serif; font-size:1.1rem; margin:0 0 18px;}
+  .field-row{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px;}
+  @media (max-width:520px){.field-row{grid-template-columns:1fr;}}
+  label{display:block; font-family:'Space Mono',monospace; font-size:0.7rem; color:var(--muted); margin-bottom:6px; text-transform:uppercase; letter-spacing:.03em;}
+  input[type=text], input[type=url], textarea, select{
+    width:100%; background:#0F0F17; border:1px solid var(--line); color:var(--text);
+    padding:11px 13px; border-radius:8px; font-family:'Inter',sans-serif; font-size:0.9rem;
+  }
+  textarea{resize:vertical; min-height:70px;}
+  .field{margin-bottom:14px;}
+  .form-actions{display:flex; gap:12px; align-items:center; flex-wrap:wrap;}
+  .form-msg{font-family:'Space Mono',monospace; font-size:0.78rem; color:var(--accent);}
+
+  footer{
+    padding:30px 28px 50px; border-top:1px solid var(--line);
+    color:var(--muted); font-size:0.8rem;
+    display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px;
+  }
+
+  /* PLAYER OVERLAY */
+  .player{
+    position:fixed; inset:0; background:rgba(6,6,9,0.96); z-index:100;
+    display:none; flex-direction:column; align-items:center; padding:26px;
+    overflow-y:auto;
+  }
+  .player.open{display:flex;}
+  .player-inner{width:100%; max-width:960px; margin:0 auto;}
+  .player-media{position:relative; width:100%; aspect-ratio:16/9; background:#000; border-radius:10px; overflow:hidden;}
+  .player-media iframe, .player-media video{width:100%; height:100%; border:0; display:block;}
+
+  /* Lightweight player tuning for low-memory phones/laptops */
+  .player-media .video-js{width:100% !important;height:100% !important;background:#000;font-family:inherit;}
+  .player-media .vjs-control-bar{height:3.2em;background:linear-gradient(to top,rgba(3,3,8,.95),rgba(3,3,8,.55),transparent);padding:0 8px;}
+  .player-media .vjs-big-play-button{width:2.8em;height:2.8em;line-height:2.8em;border-radius:50%;border:0;background:rgba(241,188,52,.95);color:#fff;box-shadow:0 5px 24px rgba(0,0,0,.35);font-size:2.2em;}
+  .player-media .vjs-big-play-button:hover,.player-media .vjs-big-play-button:focus{background:rgba(255,204,64,.98);}
+  .player-media .vjs-play-progress,.player-media .vjs-volume-level{background:#f1bc34;}
+  .player-media .vjs-slider{background:rgba(255,255,255,.28);}
+  .player-media .vjs-load-progress div{background:rgba(255,255,255,.25);}
+  .player-media .vjs-control-bar{display:flex !important; flex-wrap:nowrap !important; overflow:hidden;}
+  .player-media .vjs-control{flex:0 0 auto;}
+  .player-media .vjs-progress-control{flex:1 1 auto; min-width:45px;}
+  .player-media .vjs-fullscreen-control{display:block !important; flex:0 0 3em !important; width:3em !important;}
+  .player-media .vjs-subs-caps-button,.player-media .vjs-subtitles-button,.player-media .vjs-captions-button,.player-media .vjs-descriptions-button,.player-media .vjs-chapters-button{display:none !important;}
+  @media (max-width:520px){
+    .player-media .vjs-volume-panel{display:none !important;}
+    .player-media .vjs-current-time,.player-media .vjs-duration,.player-media .vjs-time-divider{font-size:.68em;}
+    .player-media .vjs-fullscreen-control{flex-basis:2.8em !important;width:2.8em !important;}
+  }
+  .player-media .vjs-current-time,.player-media .vjs-duration,.player-media .vjs-time-divider{font-family:'Space Mono',monospace;font-size:.78em;}
+  .player-body{padding:20px 4px 0;}
+  .player-body h3{font-family:'Archivo Black',sans-serif; font-size:1.3rem; margin:0 0 6px;}
+  .player-meta{font-family:'Space Mono',monospace; font-size:0.75rem; color:var(--muted); margin-bottom:12px;}
+  .player-desc{font-size:0.92rem; line-height:1.6; color:#D0D0DC;}
+  .player-close{
+    position:absolute; top:14px; right:14px; z-index:5;
+    background:rgba(11,11,16,0.6); border:none; color:var(--text);
+    width:36px; height:36px; border-radius:8px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .player-close:hover, .player-close:focus-visible{background:var(--accent2);}
+
+  .track-label{
+    font-family:'Space Mono',monospace; font-size:0.65rem; text-transform:uppercase;
+    letter-spacing:.05em; color:var(--muted); margin-bottom:8px;
+  }
+  .track-group{display:flex; flex-direction:column; gap:4px;}
+  .track-opt{
+    text-align:left; background:transparent; border:none; color:var(--text);
+    font-family:'Inter',sans-serif; font-size:0.85rem; padding:8px 10px; border-radius:6px;
+    cursor:pointer; transition:background .15s;
+  }
+  .track-opt:hover{background:rgba(255,255,255,0.06);}
+  .track-opt.active{background:var(--accent); color:#0B0B10; font-weight:600;}
+
+  .season-block{
+    border:1px solid var(--line); border-radius:10px; margin-bottom:12px;
+    overflow:hidden; background:var(--bg-card);
+  }
+  .season-block summary{
+    cursor:pointer; padding:14px 18px; font-family:'Archivo Black',sans-serif; font-size:0.95rem;
+    list-style:none; display:flex; align-items:center; gap:10px;
+  }
+  .season-block summary::-webkit-details-marker{display:none;}
+  .season-block summary::before{content:'▶'; font-size:0.65rem; color:var(--accent); transition:transform .15s; display:inline-block;}
+  .season-block[open] summary::before{transform:rotate(90deg);}
+  .episode-grid{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; padding:18px 22px 22px; border-top:1px solid var(--line); }
+  .ep-card{
+    position:relative; width:100%; background:var(--bg); border:1px solid var(--line); border-radius:12px;
+    overflow:hidden; cursor:pointer; transition:transform .15s, border-color .15s;
+  }
+  .ep-card:hover, .ep-card:focus-visible{ transform:translateY(-3px); border-color:rgba(91,140,255,0.4); }
+  .ep-card.episode-empty{ opacity:0.65; }
+  .ep-card .ep-thumb{ aspect-ratio:16/9; width:100%; background-size:cover; background-position:center; position:relative; }
+  .ep-card .ep-thumb .play{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:linear-gradient(180deg, rgba(11,11,16,0) 40%, rgba(11,11,16,0.7) 100%); }
+  .ep-card .ep-thumb .play svg{ opacity:0; transition:opacity .15s; }
+  .ep-card:hover .ep-thumb .play svg, .ep-card:focus-visible .ep-thumb .play svg{ opacity:1; }
+  .ep-card .ep-body{ padding:11px 12px 13px; }
+  .ep-card .ep-code{ display:block; font-family:'Space Mono',monospace; font-size:0.78rem; color:var(--accent); margin-bottom:5px; }
+  .ep-card .ep-title{ font-size:1rem; font-weight:700; line-height:1.28; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; }
+  .ep-card .ep-edit{ position:absolute; top:6px; right:6px; z-index:2; opacity:0; width:22px; height:22px; }
+  .ep-card:hover .ep-edit, .ep-card .ep-edit:focus-visible{ opacity:1; }
+  @media (max-width:480px){ .episode-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:12px 12px 16px}.ep-card .ep-body{padding:8px 9px 10px}.ep-card .ep-code{font-size:.66rem}.ep-card .ep-title{font-size:.78rem} }
+
+  .halloween-cover-editor{border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:0 0 14px;background:rgba(255,255,255,.018)}
+  .halloween-cover-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .halloween-cover-head strong{font-family:'Archivo Black',sans-serif;font-size:.88rem}
+  .halloween-cover-head small{display:block;color:var(--muted);font-family:'Space Mono',monospace;font-size:.66rem;line-height:1.45;margin-top:4px}
+  .halloween-cover-panel{margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+  .check-line{display:flex;align-items:center;gap:8px;color:var(--text);font-size:.78rem;margin-bottom:12px}
+  .check-line input{width:auto}
+  .halloween-cover-actions{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+  body.jg-decorated .halloween-cover-editor{border-color:var(--dec-border-soft,var(--line))}
+  body.jg-decorated .halloween-cover-head strong{font-family:var(--dec-display,inherit);color:var(--dec-accent,var(--text))}
+  body.jg-theme-halloween .row-head h2,
+  body.jg-theme-halloween .season-block summary,
+  body.jg-theme-halloween .collection-title{letter-spacing:.015em}
+  body.jg-theme-halloween .ep-card .ep-title{font-family:'Trebuchet MS',Arial,sans-serif;font-weight:700;letter-spacing:.005em}
+  @media(max-width:640px){
+    .halloween-cover-head{align-items:flex-start;flex-direction:column}
+    .halloween-cover-head .btn{width:100%}
+  }
+  input#importFile{display:none;}
+
+  /* JOHNGer cloud/collections additions */
+  .admin-only{display:none !important}.admin-on .admin-only{display:flex !important}
+  body:not(.admin-on) #agregar, body:not(.admin-on) #toggleAdd, body:not(.admin-on) #toggleConfig, body:not(.admin-on) #exportBtn, body:not(.admin-on) #importBtn, body:not(.admin-on) #importFile, body:not(.admin-on) #addPanel, body:not(.admin-on) #configPanel, body:not(.admin-on) #adminLoginBtn{display:none !important}
+  body:not(.admin-on) .add-section{display:none !important}
+  @media (max-width:640px){.hero{margin:14px 14px 10px;aspect-ratio:auto;min-height:250px}.hero-content{padding:22px 20px 20px}.hero-eyebrow{font-size:.66rem;letter-spacing:.06em;white-space:normal}.hero-title{font-size:clamp(1.35rem,7vw,2rem);max-width:100%;line-height:1.08}.hero-meta{font-size:.7rem;margin-bottom:14px}}
+  .collections-section{padding:26px 28px 4px}.collection-shell{position:relative;padding:0 0 34px}.collection-scroll{display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-behavior:smooth;overscroll-behavior-x:contain;touch-action:pan-y;scrollbar-width:none;padding:6px 2px 8px}.collection-scroll::-webkit-scrollbar{display:none}.collection-card{position:relative;flex:0 0 100%;min-height:180px;border-radius:16px;overflow:hidden;border:1px solid var(--line);scroll-snap-align:center;background:var(--bg-card);cursor:pointer}.collection-card:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.05),rgba(0,0,0,.78));pointer-events:none}.collection-bg{position:absolute;inset:0;background-size:cover;background-position:center;filter:saturate(1.15)}.collection-content{position:absolute;left:18px;right:18px;bottom:16px;z-index:2}.collection-title{font-family:'Archivo Black',sans-serif;font-size:1.25rem}.collection-meta{font-family:'Space Mono',monospace;color:#ddd;font-size:.68rem;margin-top:5px}.collection-admin{position:absolute;right:10px;top:10px;z-index:4;display:flex;gap:5px}.collection-admin button{border:0;border-radius:7px;padding:6px 8px;background:rgba(0,0,0,.65);color:white;cursor:pointer}.collection-theme-summer{background:linear-gradient(135deg,#f6b73c,#ef6c4d)}.collection-theme-halloween{background:linear-gradient(135deg,#1b1024,#ff6a00)}.collection-theme-christmas{background:linear-gradient(135deg,#0c4b38,#9e1b32)}.collection-theme-winter{background:linear-gradient(135deg,#526b8c,#dceeff)}.collection-theme-easter{background:linear-gradient(135deg,#b89cff,#8de1c1)}.collection-theme-valentine{background:linear-gradient(135deg,#8d1d45,#ff6f91)}.collection-theme-custom{background:linear-gradient(135deg,#303050,#7557ff)}.collection-arrow{position:absolute;top:50%;transform:translateY(-50%);z-index:8;width:42px;height:42px;border-radius:50%;border:1px solid rgba(255,255,255,.25);background:rgba(0,0,0,.62);color:#fff;font-size:25px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(5px)}.collection-arrow:hover{background:rgba(241,188,52,.95);color:#111}.collection-arrow.left{left:10px}.collection-arrow.right{right:10px}.collection-dots{position:absolute;left:50%;bottom:2px;transform:translateX(-50%);display:flex;align-items:center;justify-content:center;gap:7px;z-index:9}.collection-dot{width:7px;height:7px;border-radius:50%;border:0;padding:0;background:rgba(255,255,255,.38);cursor:pointer;transition:transform .2s,background .2s,box-shadow .2s}.collection-dot.active{background:#f1bc34;transform:scale(1.35);box-shadow:0 0 8px rgba(241,188,52,.65)}.collection-autoplay-pause{display:none}@media (max-width:700px){.collections-section{padding-left:14px;padding-right:14px}.collection-card{min-height:170px}.collection-arrow{display:none}.collection-shell{padding-bottom:30px}}
+  .collection-viewer{margin:10px 28px 28px;padding:22px;border:1px solid var(--line);border-radius:16px;background:var(--bg-card);scroll-margin-top:18px;}
+  .collection-viewer-head{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:18px;}
+  .collection-viewer-kicker{font-family:'Space Mono',monospace;font-size:.65rem;color:var(--accent);letter-spacing:.12em;margin-bottom:4px;}
+  .collection-viewer-head h2{font-family:'Archivo Black',sans-serif;margin:0;font-size:1.5rem;}
+  .collection-viewer-head p{margin:5px 0 0;color:var(--muted);font-family:'Space Mono',monospace;font-size:.7rem;}
+  .collection-viewer-list{display:flex;flex-direction:column;gap:16px;}
+  .collection-episode-card{position:relative;display:grid;grid-template-columns:minmax(300px,42%) 1fr;min-height:210px;background:var(--bg);border:1px solid var(--line);border-radius:14px;overflow:hidden;cursor:pointer;transition:transform .15s,border-color .15s;}
+  .collection-episode-card:hover,.collection-episode-card:focus-visible{transform:translateY(-2px);border-color:rgba(91,140,255,.45);outline:none;}
+  .collection-episode-thumb{width:100%;height:100%;min-height:210px;background-size:cover;background-position:center;position:relative;}
+  .collection-episode-thumb:after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent 55%,rgba(11,11,16,.45));}
+  .collection-episode-play{position:absolute;inset:0;z-index:2;display:flex;align-items:center;justify-content:center;}
+  .collection-episode-play span{width:58px;height:58px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(11,11,16,.68);border:1px solid rgba(255,255,255,.45);font-size:25px;color:#fff;padding-left:3px;}
+  .collection-episode-body{padding:24px 26px;display:flex;flex-direction:column;justify-content:center;min-width:0;}
+  .collection-episode-code{font-family:'Space Mono',monospace;color:var(--accent);font-size:.78rem;margin-bottom:9px;}
+  .collection-episode-title{font-size:1.45rem;font-weight:800;line-height:1.2;margin-bottom:10px;}
+  .collection-episode-desc{color:var(--muted);font-size:.9rem;line-height:1.5;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;}
+  .collection-empty{padding:28px;border:1px dashed var(--line);border-radius:12px;color:var(--muted);font-family:'Space Mono',monospace;font-size:.78rem;text-align:center;}
+  @media(max-width:700px){.collection-viewer{margin:8px 14px 24px;padding:14px;border-radius:14px}.collection-viewer-head{align-items:flex-start;flex-direction:column}.collection-viewer-head h2{font-size:1.25rem}.collection-viewer-head .btn{width:100%}.collection-episode-card{grid-template-columns:1fr;min-height:0}.collection-episode-thumb{height:auto;min-height:0;aspect-ratio:16/9}.collection-episode-body{padding:16px 17px 18px}.collection-episode-title{font-size:1.08rem}.collection-episode-desc{font-size:.82rem;-webkit-line-clamp:3}}
+  .cloud-status{font-family:'Space Mono',monospace;font-size:.65rem;color:var(--muted);padding:3px 6px}.cloud-status.ok{color:#75e0a1}.cloud-status.bad{color:#ff8c8c}.lang-btn{font-family:'Space Mono',monospace;font-size:.65rem;border:1px solid var(--line);background:var(--bg-elev);color:var(--text);border-radius:7px;padding:7px 9px;cursor:pointer}.admin-modal{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.82);display:none;align-items:center;justify-content:center;padding:20px}.admin-modal.open{display:flex}.admin-box{width:min(420px,100%);background:var(--bg-card);border:1px solid var(--line);border-radius:16px;padding:24px}.admin-box h3{font-family:'Archivo Black',sans-serif;margin:0 0 18px}.collection-form{display:none;background:var(--bg-card);border:1px solid var(--line);border-radius:14px;padding:20px;margin-top:12px}.admin-on .collection-form.open{display:block}.collection-form select[multiple]{min-height:170px;width:100%}.collection-form .field{margin-bottom:12px}
+  @media(min-width:700px){.season-block summary{font-size:1.2rem;padding:18px 20px}.episode-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;padding:20px 28px 26px}.ep-card .ep-body{padding:13px 15px 16px}.ep-card .ep-code{font-size:.82rem}.ep-card .ep-title{font-size:1.08rem}.tile{flex-basis:260px}}
+  .episode-empty{display:none !important}
+  .logo{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+
+  /* JOHNGer lightweight decoration system: theme details without heavy full-screen effects */
+  #decorationPanel{margin-top:12px}
+  .decoration-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .decoration-grid .field{margin:0}
+  .decoration-preview{margin-top:14px;padding:14px;border:1px dashed var(--line);border-radius:12px;background:rgba(255,255,255,.025);font-size:.82rem;color:var(--muted)}
+  .decoration-preview strong{color:var(--text)}
+  @media(max-width:640px){.decoration-grid{grid-template-columns:1fr}}
+
+  /* Keep the page background exactly as the normal site; decoration is applied only to content blocks. */
+  body.jg-decorated .logo{color:var(--dec-accent,var(--accent));text-shadow:0 0 10px var(--dec-glow-soft,transparent)}
+  body.jg-decorated .logo::after{content:var(--dec-sticker,'✦');display:inline-block;margin-left:7px;font-size:.82em;line-height:1;vertical-align:middle;filter:drop-shadow(0 2px 3px var(--dec-glow-soft,transparent))}
+  body.jg-decorated header{border-bottom-color:var(--dec-border,var(--line))}
+
+  body.jg-decorated .hero{border-color:var(--dec-border,var(--line));box-shadow:0 6px 20px var(--dec-shadow,rgba(0,0,0,.08))}
+  body.jg-decorated .hero-eyebrow{font-family:var(--dec-display,inherit);color:var(--dec-accent,var(--accent));letter-spacing:.06em;text-shadow:0 0 8px var(--dec-glow-soft,transparent)}
+  body.jg-decorated .hero-eyebrow::before{content:var(--dec-sticker,'✦');margin-right:7px;font-size:.9em}
+  body.jg-decorated #heroPlay{border-color:var(--dec-border,var(--line));box-shadow:0 3px 12px var(--dec-shadow,rgba(0,0,0,.08))}
+
+  body.jg-decorated .row-section{position:relative}
+  body.jg-decorated .row-head{padding-bottom:6px;border-bottom:1px solid var(--dec-border-soft,var(--line))}
+  body.jg-decorated .row-head h2{font-family:var(--dec-display,inherit);color:var(--dec-accent,var(--text));letter-spacing:.025em}
+  body.jg-decorated .row-head h2::before{content:var(--dec-sticker,'✦');margin-right:7px;font-size:.78em;vertical-align:1px}
+  body.jg-decorated .row-head .count{color:var(--dec-accent,var(--muted))}
+
+  body.jg-decorated .season-block{border-color:var(--dec-border,var(--line));box-shadow:0 3px 12px var(--dec-shadow,rgba(0,0,0,.06));}
+  body.jg-decorated .season-block summary{position:relative;background:linear-gradient(90deg,var(--dec-panel,transparent),transparent 58%);font-family:var(--dec-display,inherit);color:var(--dec-accent,var(--text));letter-spacing:.02em}
+  body.jg-decorated .season-block summary::before{color:var(--dec-accent,var(--accent))}
+  body.jg-decorated .season-block summary::after{content:var(--dec-sticker,'✦');margin-left:auto;font-size:.88em;opacity:.78;color:var(--dec-accent,var(--accent));}
+  body.jg-decorated .season-block summary .season-heading-text{display:inline-block;}
+
+  body.jg-decorated .ep-card{border-color:var(--dec-border-soft,var(--line));box-shadow:0 2px 9px var(--dec-shadow,rgba(0,0,0,.05));}
+  body.jg-decorated .ep-card:hover,body.jg-decorated .ep-card:focus-visible{border-color:var(--dec-border,var(--accent));box-shadow:0 5px 14px var(--dec-shadow,rgba(0,0,0,.08))}
+  body.jg-decorated .ep-card .ep-code{color:var(--dec-accent,var(--accent))}
+  body.jg-decorated .ep-card .ep-title{font-family:var(--dec-episode-font,inherit);}
+
+  body.jg-decorated #recentlyAdded,body.jg-decorated #videos{border-color:var(--dec-border,var(--line));box-shadow:0 4px 14px var(--dec-shadow,rgba(0,0,0,.06));}
+  body.jg-decorated #recentlyAdded::before,body.jg-decorated #videos::before{content:var(--dec-sticker,'✦');position:absolute;top:9px;right:12px;font-size:1rem;opacity:.7;color:var(--dec-accent,var(--accent));pointer-events:none}
+  body.jg-decorated #recentlyAdded::after,body.jg-decorated #videos::after{content:"";position:absolute;left:14px;right:14px;top:0;height:2px;background:var(--dec-accent,var(--accent));opacity:.55;border-radius:2px}
+
+  body.jg-decorated footer{border-top-color:var(--dec-border-soft,var(--line))}
+
+  /* Theme-specific typography/stickers use system fonts so the decoration adds virtually no loading cost. */
+  body.jg-theme-none{--dec-display:inherit;--dec-episode-font:inherit;}
+  body.jg-theme-summer{--dec-display:'Trebuchet MS',sans-serif;--dec-episode-font:'Trebuchet MS',sans-serif;--dec-sticker:'☀️';--dec-accent:#e5ad2f;--dec-border:#6d5a28;--dec-border-soft:#4e452c;--dec-panel:rgba(229,173,47,.055);--dec-shadow:rgba(229,173,47,.09);--dec-glow-soft:rgba(229,173,47,.18)}
+  body.jg-theme-spring{--dec-display:'Trebuchet MS',sans-serif;--dec-episode-font:'Trebuchet MS',sans-serif;--dec-sticker:'🌸';--dec-accent:#e89ab9;--dec-border:#6c4d5b;--dec-border-soft:#4d3d45;--dec-panel:rgba(232,154,185,.05);--dec-shadow:rgba(232,154,185,.08);--dec-glow-soft:rgba(232,154,185,.16)}
+  body.jg-theme-autumn{--dec-display:Georgia,'Times New Roman',serif;--dec-episode-font:Georgia,'Times New Roman',serif;--dec-sticker:'🍂';--dec-accent:#d27b38;--dec-border:#65442e;--dec-border-soft:#4b392e;--dec-panel:rgba(210,123,56,.055);--dec-shadow:rgba(210,123,56,.09);--dec-glow-soft:rgba(210,123,56,.17)}
+  body.jg-theme-winter{--dec-display:Georgia,'Times New Roman',serif;--dec-episode-font:inherit;--dec-sticker:'❄️';--dec-accent:#a9d7f7;--dec-border:#40576a;--dec-border-soft:#344654;--dec-panel:rgba(169,215,247,.045);--dec-shadow:rgba(169,215,247,.08);--dec-glow-soft:rgba(169,215,247,.17)}
+  body.jg-theme-halloween{--dec-display:Impact,'Arial Black',fantasy;--dec-episode-font:'Trebuchet MS',sans-serif;--dec-sticker:'🎃';--dec-accent:#b8ff4a;--dec-border:#52652c;--dec-border-soft:#3f4c2c;--dec-panel:rgba(184,255,74,.045);--dec-shadow:rgba(184,255,74,.09);--dec-glow-soft:rgba(184,255,74,.16)}
+  body.jg-theme-thanksgiving{--dec-display:Georgia,'Times New Roman',serif;--dec-episode-font:Georgia,'Times New Roman',serif;--dec-sticker:'🦃';--dec-accent:#d59a55;--dec-border:#69462e;--dec-border-soft:#4d3a2d;--dec-panel:rgba(213,154,85,.055);--dec-shadow:rgba(213,154,85,.09);--dec-glow-soft:rgba(213,154,85,.16)}
+  body.jg-theme-christmas{--dec-display:Georgia,'Times New Roman',serif;--dec-episode-font:inherit;--dec-sticker:'🎄';--dec-accent:#e0b85d;--dec-border:#526b58;--dec-border-soft:#3e5145;--dec-panel:rgba(224,184,93,.05);--dec-shadow:rgba(224,184,93,.08);--dec-glow-soft:rgba(224,184,93,.15)}
+  body.jg-theme-newyear{--dec-display:Georgia,'Times New Roman',serif;--dec-episode-font:inherit;--dec-sticker:'🎆';--dec-accent:#b8c8ff;--dec-border:#50577b;--dec-border-soft:#3d435f;--dec-panel:rgba(184,200,255,.045);--dec-shadow:rgba(184,200,255,.08);--dec-glow-soft:rgba(184,200,255,.16)}
+  body.jg-theme-valentine{--dec-display:cursive;--dec-episode-font:'Trebuchet MS',sans-serif;--dec-sticker:'💗';--dec-accent:#ff9fbd;--dec-border:#704657;--dec-border-soft:#513744;--dec-panel:rgba(255,159,189,.05);--dec-shadow:rgba(255,159,189,.08);--dec-glow-soft:rgba(255,159,189,.16)}
+  body.jg-theme-easter{--dec-display:'Trebuchet MS',sans-serif;--dec-episode-font:inherit;--dec-sticker:'🐰';--dec-accent:#cbb2f4;--dec-border:#5b536c;--dec-border-soft:#484255;--dec-panel:rgba(203,178,244,.045);--dec-shadow:rgba(203,178,244,.08);--dec-glow-soft:rgba(203,178,244,.15)}
+  body.jg-theme-stpatrick{--dec-display:'Trebuchet MS',sans-serif;--dec-episode-font:'Trebuchet MS',sans-serif;--dec-sticker:'☘️';--dec-accent:#91d96b;--dec-border:#496542;--dec-border-soft:#3b5137;--dec-panel:rgba(145,217,107,.045);--dec-shadow:rgba(145,217,107,.08);--dec-glow-soft:rgba(145,217,107,.15)}
+  body.jg-theme-lunar{--dec-display:Georgia,'Times New Roman',serif;--dec-episode-font:inherit;--dec-sticker:'🏮';--dec-accent:#efb94d;--dec-border:#70403f;--dec-border-soft:#533536;--dec-panel:rgba(239,185,77,.05);--dec-shadow:rgba(239,185,77,.08);--dec-glow-soft:rgba(239,185,77,.15)}
+  body.jg-theme-party{--dec-display:'Trebuchet MS',sans-serif;--dec-episode-font:'Trebuchet MS',sans-serif;--dec-sticker:'🎉';--dec-accent:#f1bc34;--dec-border:#665743;--dec-border-soft:#4c4438;--dec-panel:rgba(241,188,52,.045);--dec-shadow:rgba(241,188,52,.08);--dec-glow-soft:rgba(241,188,52,.15)}
+  body.jg-theme-stars{--dec-display:Georgia,'Times New Roman',serif;--dec-episode-font:inherit;--dec-sticker:'✨';--dec-accent:#f1d98b;--dec-border:#5e5844;--dec-border-soft:#484331;--dec-panel:rgba(241,217,139,.045);--dec-shadow:rgba(241,217,139,.08);--dec-glow-soft:rgba(241,217,139,.15)}
+
+  @media(max-width:520px){
+    body.jg-decorated .logo::after{font-size:.72em;margin-left:5px}
+    body.jg-decorated .season-block summary::after{font-size:.78em}
+    body.jg-decorated #recentlyAdded::before,body.jg-decorated #videos::before{top:7px;right:9px}
+  }
+  input#importFile{display:none;}
+
+  /* JOHNGer cloud/collections additions */
+  .admin-only{display:none !important}.admin-on .admin-only{display:flex !important}
+  body:not(.admin-on) #agregar, body:not(.admin-on) #toggleAdd, body:not(.admin-on) #toggleConfig, body:not(.admin-on) #exportBtn, body:not(.admin-on) #importBtn, body:not(.admin-on) #importFile, body:not(.admin-on) #addPanel, body:not(.admin-on) #configPanel, body:not(.admin-on) #adminLoginBtn{display:none !important}
+  body:not(.admin-on) .add-section{display:none !important}
+  @media (max-width:640px){.hero{margin:14px 14px 10px;aspect-ratio:auto;min-height:250px}.hero-content{padding:22px 20px 20px}.hero-eyebrow{font-size:.66rem;letter-spacing:.06em;white-space:normal}.hero-title{font-size:clamp(1.35rem,7vw,2rem);max-width:100%;line-height:1.08}.hero-meta{font-size:.7rem;margin-bottom:14px}}
+  .collections-section{padding:26px 28px 4px}.collection-shell{position:relative;padding:0 0 34px}.collection-scroll{display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-behavior:smooth;overscroll-behavior-x:contain;touch-action:pan-y;scrollbar-width:none;padding:6px 2px 8px}.collection-scroll::-webkit-scrollbar{display:none}.collection-card{position:relative;flex:0 0 100%;min-height:180px;border-radius:16px;overflow:hidden;border:1px solid var(--line);scroll-snap-align:center;background:var(--bg-card);cursor:pointer}.collection-card:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.05),rgba(0,0,0,.78));pointer-events:none}.collection-bg{position:absolute;inset:0;background-size:cover;background-position:center;filter:saturate(1.15)}.collection-content{position:absolute;left:18px;right:18px;bottom:16px;z-index:2}.collection-title{font-family:'Archivo Black',sans-serif;font-size:1.25rem}.collection-meta{font-family:'Space Mono',monospace;color:#ddd;font-size:.68rem;margin-top:5px}.collection-admin{position:absolute;right:10px;top:10px;z-index:4;display:flex;gap:5px}.collection-admin button{border:0;border-radius:7px;padding:6px 8px;background:rgba(0,0,0,.65);color:white;cursor:pointer}.collection-theme-summer{background:linear-gradient(135deg,#f6b73c,#ef6c4d)}.collection-theme-halloween{background:linear-gradient(135deg,#1b1024,#ff6a00)}.collection-theme-christmas{background:linear-gradient(135deg,#0c4b38,#9e1b32)}.collection-theme-winter{background:linear-gradient(135deg,#526b8c,#dceeff)}.collection-theme-easter{background:linear-gradient(135deg,#b89cff,#8de1c1)}.collection-theme-valentine{background:linear-gradient(135deg,#8d1d45,#ff6f91)}.collection-theme-custom{background:linear-gradient(135deg,#303050,#7557ff)}.collection-arrow{position:absolute;top:50%;transform:translateY(-50%);z-index:8;width:42px;height:42px;border-radius:50%;border:1px solid rgba(255,255,255,.25);background:rgba(0,0,0,.62);color:#fff;font-size:25px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(5px)}.collection-arrow:hover{background:rgba(241,188,52,.95);color:#111}.collection-arrow.left{left:10px}.collection-arrow.right{right:10px}.collection-dots{position:absolute;left:50%;bottom:2px;transform:translateX(-50%);display:flex;align-items:center;justify-content:center;gap:7px;z-index:9}.collection-dot{width:7px;height:7px;border-radius:50%;border:0;padding:0;background:rgba(255,255,255,.38);cursor:pointer;transition:transform .2s,background .2s,box-shadow .2s}.collection-dot.active{background:#f1bc34;transform:scale(1.35);box-shadow:0 0 8px rgba(241,188,52,.65)}.collection-autoplay-pause{display:none}@media (max-width:700px){.collections-section{padding-left:14px;padding-right:14px}.collection-card{min-height:170px}.collection-arrow{display:none}.collection-shell{padding-bottom:30px}}
+  .collection-viewer{margin:10px 28px 28px;padding:22px;border:1px solid var(--line);border-radius:16px;background:var(--bg-card);scroll-margin-top:18px;}
+  .collection-viewer-head{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:18px;}
+  .collection-viewer-kicker{font-family:'Space Mono',monospace;font-size:.65rem;color:var(--accent);letter-spacing:.12em;margin-bottom:4px;}
+  .collection-viewer-head h2{font-family:'Archivo Black',sans-serif;margin:0;font-size:1.5rem;}
+  .collection-viewer-head p{margin:5px 0 0;color:var(--muted);font-family:'Space Mono',monospace;font-size:.7rem;}
+  .collection-viewer-list{display:flex;flex-direction:column;gap:16px;}
+  .collection-episode-card{position:relative;display:grid;grid-template-columns:minmax(300px,42%) 1fr;min-height:210px;background:var(--bg);border:1px solid var(--line);border-radius:14px;overflow:hidden;cursor:pointer;transition:transform .15s,border-color .15s;}
+  .collection-episode-card:hover,.collection-episode-card:focus-visible{transform:translateY(-2px);border-color:rgba(91,140,255,.45);outline:none;}
+  .collection-episode-thumb{width:100%;height:100%;min-height:210px;background-size:cover;background-position:center;position:relative;}
+  .collection-episode-thumb:after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent 55%,rgba(11,11,16,.45));}
+  .collection-episode-play{position:absolute;inset:0;z-index:2;display:flex;align-items:center;justify-content:center;}
+  .collection-episode-play span{width:58px;height:58px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(11,11,16,.68);border:1px solid rgba(255,255,255,.45);font-size:25px;color:#fff;padding-left:3px;}
+  .collection-episode-body{padding:24px 26px;display:flex;flex-direction:column;justify-content:center;min-width:0;}
+  .collection-episode-code{font-family:'Space Mono',monospace;color:var(--accent);font-size:.78rem;margin-bottom:9px;}
+  .collection-episode-title{font-size:1.45rem;font-weight:800;line-height:1.2;margin-bottom:10px;}
+  .collection-episode-desc{color:var(--muted);font-size:.9rem;line-height:1.5;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;}
+  .collection-empty{padding:28px;border:1px dashed var(--line);border-radius:12px;color:var(--muted);font-family:'Space Mono',monospace;font-size:.78rem;text-align:center;}
+  @media(max-width:700px){.collection-viewer{margin:8px 14px 24px;padding:14px;border-radius:14px}.collection-viewer-head{align-items:flex-start;flex-direction:column}.collection-viewer-head h2{font-size:1.25rem}.collection-viewer-head .btn{width:100%}.collection-episode-card{grid-template-columns:1fr;min-height:0}.collection-episode-thumb{height:auto;min-height:0;aspect-ratio:16/9}.collection-episode-body{padding:16px 17px 18px}.collection-episode-title{font-size:1.08rem}.collection-episode-desc{font-size:.82rem;-webkit-line-clamp:3}}
+  .cloud-status{font-family:'Space Mono',monospace;font-size:.65rem;color:var(--muted);padding:3px 6px}.cloud-status.ok{color:#75e0a1}.cloud-status.bad{color:#ff8c8c}.lang-btn{font-family:'Space Mono',monospace;font-size:.65rem;border:1px solid var(--line);background:var(--bg-elev);color:var(--text);border-radius:7px;padding:7px 9px;cursor:pointer}.admin-modal{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.82);display:none;align-items:center;justify-content:center;padding:20px}.admin-modal.open{display:flex}.admin-box{width:min(420px,100%);background:var(--bg-card);border:1px solid var(--line);border-radius:16px;padding:24px}.admin-box h3{font-family:'Archivo Black',sans-serif;margin:0 0 18px}.collection-form{display:none;background:var(--bg-card);border:1px solid var(--line);border-radius:14px;padding:20px;margin-top:12px}.admin-on .collection-form.open{display:block}.collection-form select[multiple]{min-height:170px;width:100%}.collection-form .field{margin-bottom:12px}
+  @media(min-width:700px){.season-block summary{font-size:1.2rem;padding:18px 20px}.episode-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;padding:20px 28px 26px}.ep-card .ep-body{padding:13px 15px 16px}.ep-card .ep-code{font-size:.82rem}.ep-card .ep-title{font-size:1.08rem}.tile{flex-basis:260px}}
+  .episode-empty{display:none !important}
+  .logo{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo"><img src="data:image/jpeg;base64,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" alt="John Springfield" style="height:34px; width:auto; border-radius:6px; vertical-align:middle;"> John Springfield</div>
+  <div class="tabs" role="tablist" aria-label="Filtrar por tipo">
+    <button class="tab active" data-filter="all">All</button>
+    <button class="tab" data-filter="video">Video</button>
+    <button class="tab" data-filter="foto">Photos</button>
+  </div>
+  <button class="btn ghost" id="randomBtn" title="Play a random episode">🔀 Random</button>
+  <div class="header-actions">
+  </div>
+<div class="header-actions admin-tools">
+  <span id="cloudStatus" class="cloud-status">LOCAL</span>
+  <button id="langBtn" class="lang-btn" type="button">EN</button>
+  <button id="adminLoginBtn" class="icon-btn admin-only" type="button" title="Admin">⚙</button>
+</div>
+</header>
+
+<div id="heroWrap"></div>
+
+<section class="collections-section" id="collectionsSection" style="display:none;">
+  <div class="row-head">
+    <h2>Collections</h2>
+    <button id="newCollectionBtn" class="btn ghost admin-only" type="button">+ New Collection</button>
+  </div>
+  <div class="collection-shell" id="collectionsWrap"></div>
+  <div class="collection-form" id="collectionForm">
+    <div class="field"><label for="colName">Collection name</label><input id="colName" type="text" placeholder="Summer Specials"></div>
+    <div class="field"><label for="colTheme">Theme</label><select id="colTheme"><option value="summer">Summer</option><option value="halloween">Halloween</option><option value="christmas">Christmas</option><option value="winter">Winter</option><option value="easter">Easter</option><option value="valentine">Valentine</option><option value="custom">Custom</option></select></div>
+    <div class="field"><label for="colEntries">Episodes</label><select id="colEntries" multiple size="8"></select></div>
+    <div class="form-actions"><button id="saveCollectionBtn" class="btn" type="button">Save</button><button id="cancelCollectionBtn" class="btn ghost" type="button">Cancel</button></div>
+  </div>
+</section>
+
+<section class="collection-viewer" id="collectionViewer" style="display:none;">
+  <div class="collection-viewer-head">
+    <div>
+      <div class="collection-viewer-kicker">COLLECTION</div>
+      <h2 id="collectionViewerTitle">Collection</h2>
+      <p id="collectionViewerMeta"></p>
+    </div>
+    <button id="collectionViewerClose" class="btn ghost" type="button">← Back to collections</button>
+  </div>
+  <div id="collectionViewerEpisodes" class="collection-viewer-list"></div>
+</section>
+
+<div id="rowsWrap"></div>
+
+<div id="emptyState" class="empty" style="display:none;">
+  <p>Your channel is empty so far.</p>
+  <a href="#agregar" class="btn admin-only">+ Add your first show</a>
+</div>
+
+<section class="add-section" id="agregar">
+  <button class="btn ghost" id="toggleConfig" style="margin-right:10px;">⚙ Configure seasons</button>
+  <button class="btn ghost" id="toggleDecoration" style="margin-right:10px;">🎨 Decorate website</button>
+  <button class="btn ghost" id="toggleAdd" aria-expanded="false" aria-controls="addPanel">+ Add show</button>
+
+  <form class="add-panel" id="decorationPanel" style="margin-bottom:16px;display:none;">
+    <h3>Web decoration</h3>
+    <div class="decoration-grid">
+      <div class="field"><label for="decTheme">Theme</label><select id="decTheme">
+        <option value="none">None</option><option value="summer">Summer ☀️</option><option value="spring">Spring 🌸</option><option value="autumn">Autumn 🍂</option><option value="winter">Winter ❄️</option><option value="halloween">Halloween 🎃</option><option value="thanksgiving">Thanksgiving 🦃</option><option value="christmas">Christmas 🎄</option><option value="newyear">New Year 🎆</option><option value="valentine">Valentine 💗</option><option value="easter">Easter 🐰</option><option value="stpatrick">St. Patrick's Day ☘️</option><option value="lunar">Lunar New Year 🧧</option><option value="party">Party 🎉</option><option value="stars">Stars ✨</option>
+      </select></div>
+      <div class="field"><label for="decIntensity">Intensity</label><select id="decIntensity"><option value="subtle">Subtle</option><option value="normal">Normal</option><option value="strong">Strong</option></select></div>
+      <div class="field"><label for="decSeasons">Decorate seasons</label><select id="decSeasons"><option value="yes">Yes</option><option value="no">No</option></select></div>
+      <div class="field"><label for="decEpisodes">Decorate episodes</label><select id="decEpisodes"><option value="yes">Yes</option><option value="no">No</option></select></div>
+      <div class="field"><label for="decCollections">Decorate collections</label><select id="decCollections"><option value="yes">Yes</option><option value="no">No</option></select></div>
+      <div class="field"><label for="decMotion">Animated effects</label><select id="decMotion"><option value="yes">On</option><option value="no">Off</option></select></div>
+      <div class="field"><label for="decHalloweenCovers">Themed episode covers</label><select id="decHalloweenCovers"><option value="yes">Show cover for active theme</option><option value="no">Use normal cover</option></select></div>
+    </div>
+    <div class="decoration-preview">Preview: <strong id="decPreviewText">No decoration</strong></div>
+    <div class="form-actions"><button type="button" class="btn" id="saveDecoration">Save decoration</button><button type="button" class="btn ghost" id="cancelDecoration">Cancel</button></div>
+  </form>
+
+  <form class="add-panel" id="configPanel" style="margin-bottom:16px;">
+    <h3>Series structure</h3>
+    <div class="field-row">
+      <div class="field">
+        <label for="cSeasons">Number of seasons</label>
+        <input type="text" id="cSeasons" placeholder="31">
+      </div>
+      <div class="field">
+        <label for="cEpisodes">Episodes per season</label>
+        <input type="text" id="cEpisodes" placeholder="13">
+      </div>
+    </div>
+    <div class="form-actions">
+      <button type="button" class="btn" id="saveConfig">Save structure</button>
+      <button type="button" class="btn ghost" id="cancelConfig">Cancel</button>
+    </div>
+  </form>
+
+
+  <form class="add-panel" id="addPanel">
+    <h3>New show</h3>
+    <div class="field-row">
+      <div class="field">
+        <label for="fTitle">Title</label>
+        <input type="text" id="fTitle" required maxlength="80" placeholder="Show/episode name">
+      </div>
+      <div class="field">
+        <label for="fYear">Year</label>
+        <input type="text" id="fYear" maxlength="9" placeholder="2026">
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label for="fSeason">Season (optional, for series)</label>
+        <input type="text" id="fSeason" placeholder="1">
+      </div>
+      <div class="field">
+        <label for="fEpisode">Episode number (optional)</label>
+        <input type="text" id="fEpisode" placeholder="1">
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label for="fType">Type</label>
+        <select id="fType">
+          <option value="video">Video</option>
+          <option value="foto">Photo</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="border:1px solid var(--line); border-radius:10px; padding:16px; margin-bottom:14px;">
+      <label style="margin-bottom:10px;">Audio 1 (main)</label>
+      <div class="field-row">
+        <div class="field">
+          <label for="fLang1">Language</label>
+          <input type="text" id="fLang1" placeholder="Spanish" value="Spanish">
+        </div>
+        <div class="field">
+          <label for="fUrl1">Video link (Drive, OneDrive, Dropbox, YouTube, Vimeo)</label>
+          <input type="url" id="fUrl1" required placeholder="https://...">
+        </div>
+      </div>
+      <div class="field">
+        <label for="fSub1">Subtitle .vtt/.srt (optional)</label>
+        <input type="url" id="fSub1" placeholder="https://...">
+      </div>
+    </div>
+
+    <div id="audio2Block" style="border:1px solid var(--line); border-radius:10px; padding:16px; margin-bottom:14px; display:none;">
+      <label style="margin-bottom:10px;">Audio 2</label>
+      <div class="field-row">
+        <div class="field">
+          <label for="fLang2">Language</label>
+          <input type="text" id="fLang2" placeholder="English" value="English">
+        </div>
+        <div class="field">
+          <label for="fKind2">Link type</label>
+          <select id="fKind2">
+            <option value="audio">Audio only .mp3 (synced with main video)</option>
+            <option value="video">Full video (different language)</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label for="fUrl2">Link (Drive, OneDrive or Dropbox)</label>
+        <input type="url" id="fUrl2" placeholder="https://...">
+      </div>
+      <div class="field">
+        <label for="fSub2">Subtitle .vtt/.srt (optional)</label>
+        <input type="url" id="fSub2" placeholder="https://...">
+      </div>
+      <div class="field">
+        <label for="fDefaultAudio">Which one plays first when opened?</label>
+        <select id="fDefaultAudio">
+          <option value="1">Audio 1 (main)</option>
+          <option value="2">Audio 2</option>
+        </select>
+      </div>
+    </div>
+    <button type="button" class="btn ghost" id="toggleAudio2" style="margin-bottom:14px;">+ Add second language</button>
+    <p style="font-family:'Space Mono',monospace; font-size:0.7rem; color:var(--muted); margin:-8px 0 14px;">Live audio switching only works with direct links (OneDrive, Dropbox, .mp4) — not with Drive, YouTube or Vimeo.</p>
+
+    <div class="field-row">
+      <div class="field">
+        <label for="fThumbFile">Cover image (upload from your device)</label>
+        <input type="file" id="fThumbFile" accept="image/*">
+      </div>
+      <div class="field">
+        <label for="fThumbUrl">Or paste an image link</label>
+        <input type="url" id="fThumbUrl" placeholder="https://...">
+      </div>
+    </div>
+
+    <div class="halloween-cover-editor themed-cover-editor">
+      <div class="halloween-cover-head">
+        <div>
+          <strong id="themedCoverTitle">🎃 Halloween episode cover</strong>
+          <small id="themedCoverHelp">Optional alternate cover for the currently selected decoration. Your normal cover stays saved and can be restored anytime.</small>
+        </div>
+        <button type="button" class="btn ghost" id="toggleHalloweenCover">🎃 Change themed cover</button>
+      </div>
+      <div id="halloweenCoverPanel" class="halloween-cover-panel" style="display:none;">
+        <label class="check-line"><input type="checkbox" id="fHalloweenCoverEnabled"> <span id="themedCoverEnabledLabel">Use this cover when this decoration is active</span></label>
+        <div class="field-row">
+          <div class="field">
+            <label for="fHalloweenCoverFile" id="themedCoverFileLabel">Upload themed cover</label>
+            <input type="file" id="fHalloweenCoverFile" accept="image/*">
+          </div>
+          <div class="field">
+            <label for="fHalloweenCoverUrl" id="themedCoverUrlLabel">Or paste a themed image link</label>
+            <input type="url" id="fHalloweenCoverUrl" placeholder="https://...">
+          </div>
+        </div>
+        <div class="halloween-cover-actions">
+          <span id="halloweenCoverStatus" class="form-msg"></span>
+          <button type="button" class="btn ghost" id="clearHalloweenCover">Remove themed cover</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="fDesc">Description</label>
+      <textarea id="fDesc" maxlength="400" placeholder="Notes about this show..."></textarea>
+    </div>
+    <div class="form-actions">
+      <button type="submit" class="btn">Save</button>
+      <button type="button" class="btn ghost" id="cancelAdd">Cancel</button>
+      <span class="form-msg" id="formMsg"></span>
+    </div>
+  </form>
+</section>
+
+<footer id="siteFooter"><div class="footer-copy" style="max-width:900px;line-height:1.65;"><p data-i18n="footerIntro" style="margin:0 0 12px;">Watch is a free browser guide to television and film items hosted on the Internet Archive — animation, sitcoms, Saturday morning cartoons, and classic films. No account or app install required.</p><p data-i18n="footerPlayback" style="margin:0 0 12px;">Episodes stream as browser-friendly MP4 video. The player supports TV remote and keyboard navigation, resume progress, optional captions, offline saves, Chromecast, and AirPlay. This site only organizes and links to Archive items; it does not host the video files.</p><p data-i18n="footerRights" style="margin:0;">Availability and rights follow each Archive.org item. Listings can change or be removed when Archive takes action; this page is not a license grant and does not claim every title is public domain.</p></div></footer>
+
+<div class="player" id="player" role="dialog" aria-modal="true" aria-labelledby="pTitle">
+  <div class="player-inner">
+    <div class="player-media" id="pMedia">
+      <button class="player-close" id="pClose" aria-label="Cerrar">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M1 1L15 15M15 1L1 15" stroke="currentColor" stroke-width="1.6"/></svg>
+      </button>
+    </div>
+    <div class="player-body">
+      <h3 id="pTitle"></h3>
+      <div class="player-meta" id="pMeta"></div>
+
+      <div id="audioBar" style="display:none; align-items:center; gap:8px; flex-wrap:wrap; margin:14px 0 0;">
+        <span class="track-label" style="margin:0;">🔊 Audio</span>
+      </div>
+      <div id="volumeBar" style="display:none; align-items:center; gap:8px; margin:10px 0 0;">
+        <span class="track-label" style="margin:0; min-width:60px;">Volume</span>
+        <input type="range" id="audioVolume" min="0" max="1.5" step="0.05" value="1" style="flex:1; max-width:220px;">
+        <span id="audioVolumeVal" style="font-family:'Space Mono',monospace; font-size:0.75rem; color:var(--muted); min-width:36px;">100%</span>
+      </div>
+      <div id="audioUnlockWarn" style="display:none; align-items:center; gap:8px; margin:10px 0 0;">
+        <button type="button" class="btn" id="audioUnlockBtn">🔈 Tap to enable audio</button>
+      </div>
+      <div id="audioSyncBar" style="display:none; align-items:center; gap:6px; margin:10px 0 0; flex-wrap:wrap;">
+        <span class="track-label" style="margin:0;">Adjust audio (mp3)</span>
+        <button class="track-opt" data-audioadj="-1" style="background:rgba(255,255,255,0.06); padding:6px 10px;">-1s</button>
+        <button class="track-opt" data-audioadj="-0.5" style="background:rgba(255,255,255,0.06); padding:6px 10px;">-0.5s</button>
+        <span id="audioOffsetVal" style="font-family:'Space Mono',monospace; font-size:0.78rem; min-width:52px; text-align:center;">0.0s</span>
+        <button class="track-opt" data-audioadj="0.5" style="background:rgba(255,255,255,0.06); padding:6px 10px;">+0.5s</button>
+        <button class="track-opt" data-audioadj="1" style="background:rgba(255,255,255,0.06); padding:6px 10px;">+1s</button>
+      </div>
+      <div id="subBar" style="display:none; align-items:center; gap:8px; flex-wrap:wrap; margin:14px 0 0;">
+        <span class="track-label" style="margin:0;">💬 Subtitles</span>
+      </div>
+      <div id="offlineBarWrap" style="margin:14px 0 0;"></div>
+
+      <div class="player-desc" id="pDesc" style="margin-top:14px;"></div>
+      <div id="subSync" style="display:none; align-items:center; gap:6px; margin-top:14px; flex-wrap:wrap;">
+        <span class="track-label" style="margin:0;">Sync subtitle</span>
+        <button class="track-opt" data-adj="-1" style="background:rgba(255,255,255,0.06); padding:6px 10px;">-1s</button>
+        <button class="track-opt" data-adj="-0.2" style="background:rgba(255,255,255,0.06); padding:6px 10px;">-0.2s</button>
+        <span id="subOffsetVal" style="font-family:'Space Mono',monospace; font-size:0.78rem; min-width:52px; text-align:center;">0.0s</span>
+        <button class="track-opt" data-adj="0.2" style="background:rgba(255,255,255,0.06); padding:6px 10px;">+0.2s</button>
+        <button class="track-opt" data-adj="1" style="background:rgba(255,255,255,0.06); padding:6px 10px;">+1s</button>
+        <select id="subFactor" style="background:rgba(255,255,255,0.06); color:var(--text); border:1px solid var(--line); border-radius:6px; padding:6px 8px; font-family:'Space Mono',monospace; font-size:0.75rem; margin-left:8px;">
+          <option value="1">Normal speed</option>
+          <option value="1.0427">23.976 → 25 fps</option>
+          <option value="0.9590">25 → 23.976 fps</option>
+          <option value="1.0417">24 → 25 fps</option>
+          <option value="0.96">25 → 24 fps</option>
+          <option value="1.0010">23.976 → 24 fps</option>
+          <option value="0.9990">24 → 23.976 fps</option>
+        </select>
+      </div>
+      <p id="subError" style="display:none; color:var(--accent2); font-family:'Space Mono',monospace; font-size:0.75rem; margin:8px 0 0;"></p>
+      <div id="calibBox" style="display:none; margin-top:12px; padding:12px; border:1px dashed var(--line); border-radius:8px;">
+        <div class="track-label" style="margin-bottom:8px;">Automatic calibration (2 points)</div>
+        <p style="font-size:0.78rem; color:var(--muted); margin:0 0 10px;">Adjust the subtitle with the buttons above until it's perfect here, hit "① Mark", jump to a far-away moment in the video, adjust it again, and hit "② Mark & calculate".</p>
+        <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+          <button type="button" class="btn ghost" id="calibA" style="padding:8px 14px; font-size:0.8rem;">① Mark here</button>
+          <button type="button" class="btn" id="calibB" style="padding:8px 14px; font-size:0.8rem;">② Mark & calculate</button>
+        </div>
+        <p id="calibStatus" style="font-family:'Space Mono',monospace; font-size:0.72rem; color:var(--accent); margin:10px 0 0;"></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'mi-canal-entries';
+const CONFIG_KEY = 'mi-canal-config';
+const DECORATION_KEY = 'jg-decoration';
+let decorationConfig = { theme:'none', intensity:'normal', seasons:true, episodes:true, collections:true, motion:true, halloweenCovers:true };
+let seriesConfig = { seasons: 0, perSeason: 0 };
+
+function loadConfig(){
+  try{
+    const raw = localStorage.getItem(CONFIG_KEY);
+    seriesConfig = raw ? JSON.parse(raw) : { seasons: 0, perSeason: 0 };
+  }catch(e){ seriesConfig = { seasons: 0, perSeason: 0 }; }
+}
+function saveConfig(){
+  try{ localStorage.setItem(CONFIG_KEY, JSON.stringify(seriesConfig)); }catch(e){}
+}
+
+
+function loadDecoration(){
+  try{ const raw=localStorage.getItem(DECORATION_KEY); if(raw) decorationConfig={...decorationConfig,...JSON.parse(raw)}; }catch(e){}
+}
+function saveDecoration(){ try{localStorage.setItem(DECORATION_KEY,JSON.stringify(decorationConfig));}catch(e){} applyDecoration(); }
+function decorationSymbols(theme){
+  return ({
+    summer:['☀','✦','🌼','🌴'], spring:['🌸','🌷','✿','🦋'], autumn:['🍂','🍁','🌰','✦'],
+    winter:['❄','✧','☃','❅'], halloween:['🎃','🕸','🦇','✦'],
+    thanksgiving:['🦃','🍂','🌾','🍁'], christmas:['❄','🎄','✦','🎁'],
+    newyear:['🎆','✨','🥳','✦'], valentine:['♥','♡','💗','✦'],
+    easter:['🐰','🥚','🌷','✿'], stpatrick:['☘','🍀','✦','🌈'],
+    lunar:['🧧','🏮','✨','🌸'], party:['🎉','🎈','🎊','✦'], stars:['✦','✧','★','⋆']
+  })[theme]||[];
+}
+const THEME_COVER_META={
+  none:{label:'Normal',sticker:'🖼️'},summer:{label:'Summer',sticker:'☀️'},spring:{label:'Spring',sticker:'🌸'},
+  autumn:{label:'Autumn',sticker:'🍂'},winter:{label:'Winter',sticker:'❄️'},halloween:{label:'Halloween',sticker:'🎃'},
+  thanksgiving:{label:'Thanksgiving',sticker:'🦃'},christmas:{label:'Christmas',sticker:'🎄'},newyear:{label:'New Year',sticker:'🎆'},
+  valentine:{label:'Valentine',sticker:'💗'},easter:{label:'Easter',sticker:'🐰'},stpatrick:{label:"St. Patrick's Day",sticker:'☘️'},
+  lunar:{label:'Lunar New Year',sticker:'🧧'},party:{label:'Party',sticker:'🎉'},stars:{label:'Stars',sticker:'✨'}
+};
+function activeDecorationTheme(){return (decorationConfig&&decorationConfig.theme&&decorationConfig.theme!=='none')?decorationConfig.theme:'halloween';}
+function themeCoverMeta(theme){return THEME_COVER_META[theme]||THEME_COVER_META.halloween;}
+function migrateThemeCovers(ent){
+  if(!ent) return {};
+  const covers=(ent.themeCovers&&typeof ent.themeCovers==='object')?{...ent.themeCovers}:{};
+  if((ent.halloweenThumb||ent.halloweenThumbUrl||ent.halloweenThumbEnabled) && !covers.halloween){
+    covers.halloween={thumb:ent.halloweenThumb||null,url:ent.halloweenThumbUrl||'',enabled:ent.halloweenThumbEnabled===true};
+  }
+  return covers;
+}
+function syncThemedCoverEditor(ent){
+  const theme=activeDecorationTheme(), meta=themeCoverMeta(theme), covers=migrateThemeCovers(ent||{}), c=covers[theme]||{};
+  const title=document.getElementById('themedCoverTitle'), help=document.getElementById('themedCoverHelp'), btn=document.getElementById('toggleHalloweenCover');
+  const label=document.getElementById('themedCoverEnabledLabel'), fl=document.getElementById('themedCoverFileLabel'), ul=document.getElementById('themedCoverUrlLabel'), st=document.getElementById('halloweenCoverStatus'), en=document.getElementById('fHalloweenCoverEnabled'), url=document.getElementById('fHalloweenCoverUrl'), panel=document.getElementById('halloweenCoverPanel');
+  if(title)title.textContent=meta.sticker+' '+meta.label+' episode cover';
+  if(help)help.textContent='Optional alternate cover for '+meta.label+'. Your normal cover stays saved and can be restored anytime.';
+  if(btn)btn.textContent=meta.sticker+' Change '+meta.label+' cover';
+  if(label)label.textContent='Use this cover when the '+meta.label+' decoration is active';
+  if(fl)fl.textContent='Upload '+meta.label+' cover';
+  if(ul)ul.textContent='Or paste a '+meta.label+' image link';
+  if(en)en.checked=c.enabled===true;
+  if(url)url.value=c.url||'';
+  if(st)st.textContent=(c.thumb||c.url)?(meta.label+' cover is saved for this episode.') : '';
+  if(panel)panel.style.display=(c.thumb||c.url)?'block':'none';
+  if(btn)btn.textContent=(c.thumb||c.url)?meta.sticker+' Hide '+meta.label+' cover options':meta.sticker+' Change '+meta.label+' cover';
+  return {theme,meta,c};
+}
+function applyDecoration(){
+  const body=document.body;
+  const themes=['summer','spring','autumn','winter','halloween','thanksgiving','christmas','newyear','valentine','easter','stpatrick','lunar','party','stars'];
+  body.classList.remove('jg-decorated','jg-decor-subtle','jg-decor-normal','jg-decor-strong','jg-no-season-decor','jg-no-episode-decor','jg-no-collection-decor', ...themes.map(t=>'jg-theme-'+t));
+  const root=document.documentElement;
+  ['--dec-accent','--dec-border','--dec-border-soft','--dec-panel','--dec-shadow','--dec-glow-soft','--dec-sticker','--dec-display','--dec-episode-font'].forEach(k=>root.style.removeProperty(k));
+  const d=decorationConfig||{};
+  if(!d.theme||d.theme==='none') return;
+  body.classList.add('jg-decorated','jg-decor-'+(d.intensity||'normal'),'jg-theme-'+d.theme);
+  if(d.seasons===false) body.classList.add('jg-no-season-decor');
+  if(d.episodes===false) body.classList.add('jg-no-episode-decor');
+  if(d.collections===false) body.classList.add('jg-no-collection-decor');
+}
+function syncDecorationForm(){
+  const d=decorationConfig||{};
+  const ids=['decTheme','decIntensity','decSeasons','decEpisodes','decCollections','decMotion'];
+  ids.forEach(id=>{
+    const el=document.getElementById(id);
+    if(!el)return;
+    el.value=id==='decTheme'?(d.theme||'none'):
+      id==='decIntensity'?(d.intensity||'normal'):
+      id==='decSeasons'?(d.seasons===false?'no':'yes'):
+      id==='decEpisodes'?(d.episodes===false?'no':'yes'):
+      id==='decCollections'?(d.collections===false?'no':'yes'):
+      (d.motion===false?'no':'yes');
+  });
+  const hc=document.getElementById('decHalloweenCovers');
+  if(hc)hc.value=d.halloweenCovers===false?'no':'yes';
+  updateDecorationPreview();
+}
+function updateDecorationPreview(){const el=document.getElementById('decPreviewText');if(!el)return;const d=decorationConfig||{};el.textContent=d.theme==='none'?'No decoration':(d.theme+' · '+(d.intensity||'normal')+' · '+(d.motion===false?'static':'animated'));}
+loadDecoration();applyDecoration();
+const toggleDecoration=document.getElementById('toggleDecoration'), decorationPanel=document.getElementById('decorationPanel');
+if(toggleDecoration)toggleDecoration.addEventListener('click',()=>{syncDecorationForm();decorationPanel.style.display=decorationPanel.style.display==='block'?'none':'block';});
+if(document.getElementById('cancelDecoration'))document.getElementById('cancelDecoration').onclick=()=>decorationPanel.style.display='none';
+['decTheme','decIntensity','decSeasons','decEpisodes','decCollections','decMotion','decHalloweenCovers'].forEach(id=>{const el=document.getElementById(id);if(el)el.addEventListener('change',()=>{const d={...decorationConfig};d.theme=document.getElementById('decTheme').value;d.intensity=document.getElementById('decIntensity').value;d.seasons=document.getElementById('decSeasons').value==='yes';d.episodes=document.getElementById('decEpisodes').value==='yes';d.collections=document.getElementById('decCollections').value==='yes';d.motion=document.getElementById('decMotion').value==='yes';d.halloweenCovers=document.getElementById('decHalloweenCovers').value==='yes';decorationConfig=d;updateDecorationPreview();});});
+if(document.getElementById('saveDecoration'))document.getElementById('saveDecoration').onclick=()=>{const d={...decorationConfig,theme:document.getElementById('decTheme').value,intensity:document.getElementById('decIntensity').value,seasons:document.getElementById('decSeasons').value==='yes',episodes:document.getElementById('decEpisodes').value==='yes',collections:document.getElementById('decCollections').value==='yes',motion:document.getElementById('decMotion').value==='yes',halloweenCovers:document.getElementById('decHalloweenCovers').value==='yes'};decorationConfig=d;saveDecoration();applyDecoration();render();renderCollections();if(editingIdx!==null)syncThemedCoverEditor(entries[editingIdx]);else syncThemedCoverEditor(null);decorationPanel.style.display='none';};
+const toggleConfig = document.getElementById('toggleConfig');
+const configPanel = document.getElementById('configPanel');
+toggleConfig.addEventListener('click', () => {
+  document.getElementById('cSeasons').value = seriesConfig.seasons || '';
+  document.getElementById('cEpisodes').value = seriesConfig.perSeason || '';
+  configPanel.classList.toggle('open');
+});
+document.getElementById('cancelConfig').addEventListener('click', () => configPanel.classList.remove('open'));
+document.getElementById('saveConfig').addEventListener('click', () => {
+  const seasons = parseInt(document.getElementById('cSeasons').value, 10) || 0;
+  const perSeason = parseInt(document.getElementById('cEpisodes').value, 10) || 0;
+  seriesConfig = { seasons, perSeason };
+  saveConfig();
+  configPanel.classList.remove('open');
+  render();
+});
+
+function openAddForEpisode(season, episode){
+  if (typeof isAdmin !== 'undefined' && !isAdmin) return;
+  addPanel.classList.add('open');
+  toggleAdd.setAttribute('aria-expanded','true');
+  document.getElementById('fSeason').value = season;
+  document.getElementById('fEpisode').value = episode;
+  document.getElementById('fTitle').focus();
+  addPanel.scrollIntoView({ behavior:'smooth', block:'start' });
+}
+let entries = [];
+let currentFilter = 'all';
+
+const TONES = ['#5B8CFF','#C965F2','#3E7A6B','#B15C4C','#4C5A9C','#8A5A9C'];
+function toneFor(str){
+  let sum=0; for(let i=0;i<str.length;i++) sum+=str.charCodeAt(i);
+  return TONES[sum % TONES.length];
+}
+
+function parseVideoUrl(raw){
+  const url = raw.trim();
+  try{
+    const u = new URL(url);
+    let ytId = null;
+    if (u.hostname.includes('youtu.be')) ytId = u.pathname.slice(1);
+    else if (u.hostname.includes('youtube.com')){
+      if (u.pathname === '/watch') ytId = u.searchParams.get('v');
+      else if (u.pathname.startsWith('/embed/')) ytId = u.pathname.split('/embed/')[1];
+      else if (u.pathname.startsWith('/shorts/')) ytId = u.pathname.split('/shorts/')[1];
+    }
+    if (ytId){
+      ytId = ytId.split('&')[0].split('?')[0];
+      return { type:'youtube', embed:`https://www.youtube.com/embed/${ytId}`, thumb:`https://i.ytimg.com/vi/${ytId}/hqdefault.jpg` };
+    }
+    if (u.hostname.includes('vimeo.com')){
+      const m = u.pathname.match(/(\d+)/);
+      if (m) return { type:'vimeo', embed:`https://player.vimeo.com/video/${m[1]}`, thumb:null };
+    }
+    if (u.hostname.includes('drive.google.com')){
+      const m = u.pathname.match(/\/d\/([^/]+)/);
+      if (m) return { type:'drive', embed:`https://drive.google.com/file/d/${m[1]}/preview`, thumb:null };
+    }
+    if (u.hostname.includes('1drv.ms') || u.hostname.includes('onedrive.live.com') || u.hostname.includes('sharepoint.com')){
+      const b64 = btoa(url).replace(/=/g,'').replace(/\//g,'_').replace(/\+/g,'-');
+      return { type:'direct', embed:`https://api.onedrive.com/v1.0/shares/u!${b64}/root/content`, thumb:null };
+    }
+    if (u.hostname.includes('dropbox.com')){
+      u.hostname = 'dl.dropboxusercontent.com';
+      u.searchParams.delete('dl');
+      u.searchParams.set('raw','1');
+      return { type:'direct', embed:u.toString(), thumb:null };
+    }
+    if (/\.(mp4|webm|mov|ogg)$/i.test(u.pathname)){
+      return { type:'direct', embed:url, thumb:null };
+    }
+    return { type:'other', embed:url, thumb:null };
+  }catch(e){
+    return { type:'other', embed:url, thumb:null };
+  }
+}
+
+function mediaHtml(info, autoplay){
+  if (info.type === 'youtube'){
+    return `<iframe src="${info.embed}${autoplay?'?autoplay=1':''}" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen title="reproductor de video"></iframe>`;
+  }
+  if (info.type === 'vimeo'){
+    return `<iframe src="${info.embed}${autoplay?'?autoplay=1':''}" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen title="reproductor de video"></iframe>`;
+  }
+  if (info.type === 'drive'){
+    return `<iframe src="${info.embed}" allow="autoplay" allowfullscreen title="reproductor de video"></iframe>`;
+  }
+  if (info.type === 'direct'){
+    return `<video src="${info.embed}" controls ${autoplay?'autoplay':''} playsinline></video>`;
+  }
+  return `<iframe src="${info.embed}" allowfullscreen title="reproductor de video"></iframe>`;
+}
+
+function loadEntries(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    entries = raw ? JSON.parse(raw) : [];
+  }catch(e){ entries = []; }
+  render();
+}
+function saveEntries(){
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+  }catch(e){
+    console.error(e);
+    alert('No se pudo guardar en este navegador. Exporta un respaldo para no perder tus datos.');
+  }
+}
+
+function escapeHtml(s){ const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+
+function tileHtml(e, idx){
+  const info = parseVideoUrl(e.url);
+  const thumbSrc = getEpisodeThumb(e);
+  const thumbStyle = thumbSrc ? `background-image:url('${thumbSrc}')` : `background-color:${toneFor(e.title||'x')}`;
+  return `
+    <div class="tile" tabindex="0" role="button" data-idx="${idx}" aria-label="Play ${escapeHtml(e.title)}">
+      <span class="tile-badge">${e.type === 'foto' ? 'Foto' : 'Video'}</span>
+      <button class="tile-delete admin-only" data-edit="${idx}" style="right:40px;" aria-label="Edit ${escapeHtml(e.title)}">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M11 2l3 3-8 8-3.5 1 1-3.5 8-8z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="tile-delete admin-only" data-del="${idx}" aria-label="Delete ${escapeHtml(e.title)}">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M2 4H14M6 4V2.5C6 2 6.5 1.5 7 1.5H9C9.5 1.5 10 2 10 2.5V4M12.5 4L12 13.5C12 14 11.5 14.5 11 14.5H5C4.5 14.5 4 14 4 13.5L3.5 4" stroke="currentColor" stroke-width="1.3"/></svg>
+      </button>
+      <div class="tile-thumb" style="${thumbStyle}">
+        <span class="play">
+          <svg width="34" height="34" viewBox="0 0 40 40"><circle cx="20" cy="20" r="19" fill="rgba(11,11,16,0.55)" stroke="rgba(237,237,242,0.6)"/><path d="M16 13L28 20L16 27V13Z" fill="#EDEDF2"/></svg>
+        </span>
+      </div>
+      <div class="tile-info">
+        <h3>${escapeHtml(e.title)}</h3>
+        <div class="meta">${escapeHtml(e.year || '—')}</div>
+      </div>
+    </div>
+  `;
+}
+
+function getEpisodeThumb(ent){
+  const normal=ent.thumb || ent.thumbUrl || parseVideoUrl((ent.audios && ent.audios[0] ? ent.audios[0].url : ent.url) || '').thumb;
+  const theme=(decorationConfig&&decorationConfig.theme&&decorationConfig.theme!=='none')?decorationConfig.theme:null;
+  const covers=migrateThemeCovers(ent);
+  const c=theme?covers[theme]:null;
+  const show=decorationConfig && decorationConfig.halloweenCovers!==false;
+  if(theme && show && c && c.enabled && (c.thumb||c.url)) return c.thumb||c.url;
+  return normal;
+}
+
+function render(){
+  const heroWrap = document.getElementById('heroWrap');
+  const rowsWrap = document.getElementById('rowsWrap');
+  const empty = document.getElementById('emptyState');
+
+  if (entries.length === 0){
+    heroWrap.innerHTML = '';
+    rowsWrap.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  const featured = entries[0];
+  const finfo = parseVideoUrl(featured.url);
+  const heroSrc = getEpisodeThumb(featured);
+  const heroBg = heroSrc ? `background-image:url('${heroSrc}')` : `background-color:${toneFor(featured.title)}`;
+  heroWrap.innerHTML = `
+    <div class="hero">
+      <div class="hero-bg" style="${heroBg}"></div>
+      <div class="hero-gradient"></div>
+      <div class="hero-content">
+        <p class="hero-eyebrow">Recently added</p>
+        <h1 class="hero-title">${escapeHtml(featured.title)}</h1>
+        <p class="hero-meta">${featured.type === 'foto' ? 'Photo' : 'Video'} · ${escapeHtml(featured.year || 'no date')}</p>
+        <button class="btn" id="heroPlay" data-idx="0">▶ Play</button>
+      </div>
+    </div>
+  `;
+  document.getElementById('heroPlay').addEventListener('click', () => openPlayer(0));
+
+  const videos = entries.map((e,i)=>({e,i})).filter(x => x.e.type !== 'foto');
+  const fotos = entries.map((e,i)=>({e,i})).filter(x => x.e.type === 'foto');
+
+  let html = '';
+
+  function epThumbStyle(ent){
+    const src = getEpisodeThumb(ent);
+    return src ? `background-image:url('${src}')` : `background-color:${toneFor(ent.title || 'x')}`;
+  }
+
+  if (seriesConfig.seasons > 0 && currentFilter !== 'foto'){
+    html += `<div class="row-section"><div class="row-head"><h2>Series</h2></div>`;
+    for (let sn = 1; sn <= seriesConfig.seasons; sn++){
+      html += `<details class="season-block" ${sn === 1 ? 'open' : ''}>
+        <summary><span class="season-heading-text">Season ${sn}</span></summary>
+        <div class="episode-grid">
+        ${Array.from({length: seriesConfig.perSeason || 1}, (_, k) => k+1).map(ep => {
+          const found = entries.map((e,i)=>({e,i})).find(x => x.e.season === sn && x.e.episode === ep);
+          if (found){
+            return `<div class="ep-card" tabindex="0" role="button" data-idx="${found.i}" aria-label="Play ${escapeHtml(found.e.title)}">
+              <button class="tile-delete ep-edit admin-only" data-edit="${found.i}" aria-label="Edit ${escapeHtml(found.e.title)}">
+                <svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M11 2l3 3-8 8-3.5 1 1-3.5 8-8z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+              </button>
+              <div class="ep-thumb" style="${epThumbStyle(found.e)}">
+                <span class="play"><svg width="26" height="26" viewBox="0 0 40 40"><circle cx="20" cy="20" r="19" fill="rgba(11,11,16,0.55)" stroke="rgba(237,237,242,0.6)"/><path d="M16 13L28 20L16 27V13Z" fill="#EDEDF2"/></svg></span>
+              </div>
+              <div class="ep-body"><span class="ep-code">T${sn}E${ep}</span><div class="ep-title">${escapeHtml(found.e.title)}</div></div>
+            </div>`;
+          }
+          return `<div class="ep-card episode-empty" tabindex="0" role="button" data-add-season="${sn}" data-add-episode="${ep}" aria-label="Add episode ${ep} of season ${sn}">
+            <div class="ep-thumb" style="display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.03);"><span style="font-size:1.5rem; color:var(--muted);">+</span></div>
+            <div class="ep-body"><span class="ep-code">T${sn}E${ep}</span><div class="ep-title" style="color:var(--muted); font-weight:400;">Empty</div></div>
+          </div>`;
+        }).join('')}
+        </div>
+      </details>`;
+    }
+    html += `</div>`;
+  } else {
+    const seriesEntries = entries.map((e,i)=>({e,i})).filter(x => x.e.season);
+    if (seriesEntries.length && currentFilter !== 'foto'){
+      const seasons = {};
+      seriesEntries.forEach(x => {
+        const s = x.e.season;
+        if (!seasons[s]) seasons[s] = [];
+        seasons[s].push(x);
+      });
+      const seasonNums = Object.keys(seasons).map(Number).sort((a,b)=>a-b);
+      html += `<div class="row-section"><div class="row-head"><h2>Series</h2></div>`;
+      seasonNums.forEach((sn, si) => {
+        const eps = seasons[sn].slice().sort((a,b)=>(a.e.episode||0)-(b.e.episode||0));
+        html += `<details class="season-block" ${si === 0 ? 'open' : ''}>
+          <summary><span class="season-heading-text">Season ${sn}</span></summary>
+          <div class="episode-grid">
+          ${eps.map(x => `
+            <div class="ep-card" tabindex="0" role="button" data-idx="${x.i}" aria-label="Play ${escapeHtml(x.e.title)}">
+              <button class="tile-delete ep-edit admin-only" data-edit="${x.i}" aria-label="Edit ${escapeHtml(x.e.title)}">
+                <svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M11 2l3 3-8 8-3.5 1 1-3.5 8-8z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+              </button>
+              <div class="ep-thumb" style="${epThumbStyle(x.e)}">
+                <span class="play"><svg width="26" height="26" viewBox="0 0 40 40"><circle cx="20" cy="20" r="19" fill="rgba(11,11,16,0.55)" stroke="rgba(237,237,242,0.6)"/><path d="M16 13L28 20L16 27V13Z" fill="#EDEDF2"/></svg></span>
+              </div>
+              <div class="ep-body"><span class="ep-code">T${sn}E${x.e.episode || '?'}</span><div class="ep-title">${escapeHtml(x.e.title)}</div></div>
+            </div>`).join('')}
+          </div>
+        </details>`;
+      });
+      html += `</div>`;
+    }
+  }
+
+  if (currentFilter !== 'foto' && videos.length){
+    html += `
+      <div class="row-section">
+        <div class="row-head"><h2>Video</h2><span class="count">${videos.length}</span></div>
+        <div class="row-scroll">${videos.map(x => tileHtml(x.e, x.i)).join('')}</div>
+      </div>`;
+  }
+  if (currentFilter !== 'video' && fotos.length){
+    html += `
+      <div class="row-section">
+        <div class="row-head"><h2>Photos</h2><span class="count">${fotos.length}</span></div>
+        <div class="row-scroll">${fotos.map(x => tileHtml(x.e, x.i)).join('')}</div>
+      </div>`;
+  }
+  rowsWrap.innerHTML = html;
+
+  rowsWrap.querySelectorAll('.tile').forEach(el => {
+    const idx = parseInt(el.dataset.idx, 10);
+    el.addEventListener('click', (ev) => {
+      if (ev.target.closest('[data-del]') || ev.target.closest('[data-edit]')) return;
+      openPlayer(idx);
+    });
+    el.addEventListener('keydown', (ev) => {
+      if ((ev.key === 'Enter' || ev.key === ' ') && !ev.target.closest('[data-del]') && !ev.target.closest('[data-edit]')){
+        ev.preventDefault();
+        openPlayer(idx);
+      }
+    });
+  });
+  rowsWrap.querySelectorAll('.ep-card[data-idx]').forEach(el => {
+    const idx = parseInt(el.dataset.idx, 10);
+    el.addEventListener('click', (ev) => {
+      if (ev.target.closest('[data-edit]')) return;
+      openPlayer(idx);
+    });
+    el.addEventListener('keydown', (ev) => {
+      if ((ev.key === 'Enter' || ev.key === ' ') && !ev.target.closest('[data-edit]')){ ev.preventDefault(); openPlayer(idx); }
+    });
+  });
+  rowsWrap.querySelectorAll('.ep-card[data-add-season]').forEach(el => {
+    if (typeof isAdmin !== 'undefined' && !isAdmin) return;
+    const s = parseInt(el.dataset.addSeason, 10);
+    const ep = parseInt(el.dataset.addEpisode, 10);
+    el.addEventListener('click', () => openAddForEpisode(s, ep));
+    el.addEventListener('keydown', (ev) => {
+      if (ev.key === 'Enter' || ev.key === ' '){ ev.preventDefault(); openAddForEpisode(s, ep); }
+    });
+  });
+  rowsWrap.querySelectorAll('[data-edit]').forEach(btn => {
+    btn.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      openEditForm(parseInt(btn.dataset.edit, 10));
+    });
+  });
+  rowsWrap.querySelectorAll('[data-del]').forEach(btn => {
+    btn.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      const idx = parseInt(btn.dataset.del, 10);
+      const e = entries[idx];
+      if (confirm(`Delete "${e.title}" from your channel?`)){
+        entries.splice(idx,1);
+        saveEntries();
+        render();
+      }
+    });
+  });
+}
+
+let vjsPlayer = null;
+let randomMode = false;
+
+let ffmpegInstance = null;
+
+async function combineAudioIntoVideo(videoUrl, mp3Url, offsetSeconds, filenameBase, btn){
+  const origText = btn.textContent;
+  btn.disabled = true;
+  try{
+    if (!ffmpegInstance){
+      btn.textContent = '⏳ Loading tool (first time only)...';
+      const { createFFmpeg, fetchFile } = FFmpeg;
+      ffmpegInstance = createFFmpeg({
+        log: false,
+        corePath: 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.11.0/dist/ffmpeg-core.js'
+      });
+      ffmpegInstance._fetchFile = fetchFile;
+      await ffmpegInstance.load();
+    }
+    const ffmpeg = ffmpegInstance;
+    const fetchFile = ffmpeg._fetchFile;
+
+    btn.textContent = '⏳ Downloading video...';
+    ffmpeg.FS('writeFile', 'input_video', await fetchFile(videoUrl));
+
+    btn.textContent = '⏳ Downloading audio...';
+    ffmpeg.FS('writeFile', 'input_audio.mp3', await fetchFile(mp3Url));
+
+    ffmpeg.setProgress(({ ratio }) => {
+      if (ratio >= 0 && ratio <= 1) btn.textContent = `⏳ Combining... ${Math.round(ratio * 100)}%`;
+    });
+
+    const args = ['-i', 'input_video'];
+    if (offsetSeconds > 0){
+      args.push('-itsoffset', String(offsetSeconds), '-i', 'input_audio.mp3');
+    } else if (offsetSeconds < 0){
+      args.push('-ss', String(Math.abs(offsetSeconds)), '-i', 'input_audio.mp3');
+    } else {
+      args.push('-i', 'input_audio.mp3');
+    }
+    args.push('-map', '0:v:0', '-map', '1:a:0', '-c:v', 'copy', '-c:a', 'aac', '-shortest', 'output.mp4');
+
+    btn.textContent = '⏳ Combining...';
+    await ffmpeg.run(...args);
+
+    const data = ffmpeg.FS('readFile', 'output.mp4');
+    const blob = new Blob([data.buffer], { type: 'video/mp4' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${filenameBase}-combined.mp4`;
+    a.click();
+    URL.revokeObjectURL(url);
+
+    ['input_video', 'input_audio.mp3', 'output.mp4'].forEach(f => { try{ ffmpeg.FS('unlink', f); }catch(e){} });
+
+    btn.textContent = '✓ Downloaded — upload it as a new video link';
+  }catch(e){
+    console.warn('Combine failed:', e);
+    btn.textContent = '⚠ Failed (see console)';
+    alert('Could not combine the files. This can happen with very large files or on a device with limited memory/RAM. Try a shorter clip first, or check the browser console (F12) for details.');
+  } finally {
+    setTimeout(() => { btn.textContent = origText; btn.disabled = false; }, 5000);
+  }
+}
+
+function playRandomEpisode(){
+  const seriesPool = entries.filter(en => en.season && en.episode);
+  const pool = seriesPool.length ? seriesPool : entries.filter(en => en.type !== 'foto');
+  if (!pool.length) return;
+  const choice = pool[Math.floor(Math.random() * pool.length)];
+  const idx = entries.indexOf(choice);
+  openPlayer(idx, true);
+}
+
+function resolveAnyDirectUrl(raw){
+  try{
+    const u = new URL(raw.trim());
+    if (u.hostname.includes('drive.google.com')){
+      const m = u.pathname.match(/\/d\/([^/]+)/);
+      const id = m ? m[1] : u.searchParams.get('id');
+      return id ? `https://drive.google.com/uc?export=download&id=${id}` : raw;
+    }
+    if (u.hostname.includes('1drv.ms') || u.hostname.includes('onedrive.live.com') || u.hostname.includes('sharepoint.com')){
+      const b64 = btoa(raw).replace(/=/g,'').replace(/\//g,'_').replace(/\+/g,'-');
+      return `https://api.onedrive.com/v1.0/shares/u!${b64}/root/content`;
+    }
+    if (u.hostname.includes('dropbox.com')){
+      u.hostname = 'dl.dropboxusercontent.com';
+      u.searchParams.delete('dl');
+      u.searchParams.set('raw','1');
+      return u.toString();
+    }
+    return raw;
+  }catch(e){ return raw; }
+}
+
+function setMainMuted(state){
+  if (!vjsPlayer) return;
+  vjsPlayer.muted(state);
+  vjsPlayer.volume(state ? 0 : 1);
+  try{
+    const techEl = vjsPlayer.tech({ IWillNotUseThisInPlugins: true }).el();
+    if (techEl){ techEl.muted = state; techEl.volume = state ? 0 : 1; }
+  }catch(e){}
+}
+
+function toggleMainVolumeUi(hide){
+  if (!vjsPlayer) return;
+  try{
+    const vp = vjsPlayer.controlBar.getChild('volumePanel');
+    if (vp) vp.el().style.display = hide ? 'none' : '';
+    const mb = vjsPlayer.controlBar.getChild('muteToggle');
+    if (mb) mb.el().style.display = hide ? 'none' : '';
+  }catch(e){}
+}
+
+function srtToVtt(text){
+  return 'WEBVTT\n\n' + text
+    .replace(/\r+/g, '')
+    .replace(/^\d+\n/gm, '')
+    .replace(/(\d{2}:\d{2}:\d{2}),(\d{3})/g, '$1.$2');
+}
+
+function shiftVtt(text, offsetSeconds, factor){
+  factor = factor || 1;
+  return text.replace(/(\d{2}):(\d{2}):(\d{2})\.(\d{3})/g, (m,h,mi,s,ms) => {
+    let orig = (+h)*3600 + (+mi)*60 + (+s) + (+ms)/1000;
+    let total = orig * factor + offsetSeconds;
+    if (total < 0) total = 0;
+    const hh = String(Math.floor(total/3600)).padStart(2,'0');
+    const mm = String(Math.floor((total%3600)/60)).padStart(2,'0');
+    const ss = String(Math.floor(total%60)).padStart(2,'0');
+    const msRem = String(Math.round((total - Math.floor(total))*1000)).padStart(3,'0');
+    return `${hh}:${mm}:${ss}.${msRem}`;
+  });
+}
+
+let currentSubtitleRaw = null;
+let currentSubtitleLang = '';
+let subtitleOffset = 0;
+let subtitleFactor = 1;
+
+let currentSubtitleBlobUrl = null;
+
+function clearSubtitleTracks(){
+  if (!vjsPlayer) return;
+  const tracks = vjsPlayer.remoteTextTracks();
+  for (let i = tracks.length - 1; i >= 0; i--) vjsPlayer.removeRemoteTextTrack(tracks[i]);
+  if (currentSubtitleBlobUrl){ try{ URL.revokeObjectURL(currentSubtitleBlobUrl); }catch(e){} currentSubtitleBlobUrl=null; }
+}
+
+function subtitleLangCode(lang){
+  const s = String(lang || '').toLowerCase();
+  if (s.startsWith('es') || s.includes('spanish') || s.includes('español') || s.includes('espanol')) return 'es';
+  if (s.startsWith('en') || s.includes('english') || s.includes('inglés') || s.includes('ingles')) return 'en';
+  return s.split(/[-_]/)[0] || 'en';
+}
+
+function renderSubtitleTrack(){
+  if (!vjsPlayer || !currentSubtitleRaw) return;
+  clearSubtitleTracks();
+  const shifted = shiftVtt(currentSubtitleRaw, subtitleOffset, subtitleFactor);
+  const blob = new Blob([shifted], { type:'text/vtt' });
+  currentSubtitleBlobUrl = URL.createObjectURL(blob);
+  const langCode = subtitleLangCode(currentSubtitleLang);
+  const trackEl = vjsPlayer.addRemoteTextTrack({kind:'subtitles',src:currentSubtitleBlobUrl,srclang:langCode,language:langCode,label:currentSubtitleLang || (langCode==='es'?'Español':'English'),default:true}, true);
+  try{ if (trackEl && trackEl.track) trackEl.track.mode='showing'; }catch(e){}
+  try{ const tracks=vjsPlayer.textTracks(); for(let i=0;i<tracks.length;i++){ if(tracks[i].kind==='subtitles'||tracks[i].kind==='captions') tracks[i].mode=(tracks[i].language===langCode?'showing':'disabled'); } }catch(e){}
+}
+
+function updateSyncUi(){
+  const box = document.getElementById('subSync');
+  box.style.display = currentSubtitleRaw ? 'flex' : 'none';
+  document.getElementById('subOffsetVal').textContent = subtitleOffset.toFixed(1) + 's';
+  document.getElementById('subFactor').value = String(subtitleFactor);
+  document.getElementById('calibBox').style.display = currentSubtitleRaw ? 'block' : 'none';
+}
+
+let calibPointA = null;
+
+document.getElementById('calibA').addEventListener('click', () => {
+  if (!vjsPlayer || !currentSubtitleRaw) return;
+  calibPointA = { t: vjsPlayer.currentTime(), off: subtitleOffset };
+  document.getElementById('calibStatus').textContent = `Point 1 saved at ${calibPointA.t.toFixed(1)}s. Now go to a far-away moment, readjust, and hit "② Mark & calculate".`;
+});
+
+document.getElementById('calibB').addEventListener('click', () => {
+  if (!vjsPlayer || !currentSubtitleRaw) return;
+  if (!calibPointA){
+    document.getElementById('calibStatus').textContent = 'First hit "① Mark here" at the first point.';
+    return;
+  }
+  const tB = vjsPlayer.currentTime();
+  const offB = subtitleOffset;
+  if (Math.abs(tB - calibPointA.t) < 5){
+    document.getElementById('calibStatus').textContent = 'Pick a second moment further from the first one for better precision.';
+    return;
+  }
+  const factor = 1 + (calibPointA.off - offB) / (calibPointA.t - tB);
+  const offset = calibPointA.off - (factor - 1) * calibPointA.t;
+  subtitleFactor = factor;
+  subtitleOffset = offset;
+  updateSyncUi();
+  renderSubtitleTrack();
+  document.getElementById('calibStatus').textContent = `Calibrated — speed adjusted ${factor.toFixed(4)}x. It should stay in sync now.`;
+  calibPointA = null;
+});
+
+document.getElementById('subSync').addEventListener('click', (ev) => {
+  const btn = ev.target.closest('[data-adj]');
+  if (!btn) return;
+  subtitleOffset += parseFloat(btn.dataset.adj);
+  updateSyncUi();
+  renderSubtitleTrack();
+});
+document.getElementById('subFactor').addEventListener('change', (ev) => {
+  subtitleFactor = parseFloat(ev.target.value) || 1;
+  renderSubtitleTrack();
+});
+
+function resetSubtitleState(){
+  currentSubtitleRaw = null;
+  subtitleOffset = 0;
+  subtitleFactor = 1;
+  calibPointA = null;
+  clearSubtitleTracks();
+  updateSyncUi();
+  document.getElementById('calibStatus').textContent = '';
+  const err = document.getElementById('subError');
+  err.style.display = 'none';
+  err.textContent = '';
+}
+
+async function attachSubtitle(url, lang){
+  resetSubtitleState();
+  if (!url || !vjsPlayer) return;
+  try{
+    const resolved = resolveAnyDirectUrl(url);
+    const res = await fetch(resolved);
+    if (!res.ok) throw new Error('respuesta no válida');
+    let text = await res.text();
+    if (!text.trim().toUpperCase().startsWith('WEBVTT')) text = srtToVtt(text);
+    currentSubtitleRaw = text;
+    currentSubtitleLang = lang;
+    subtitleOffset = 0;
+    subtitleFactor = 1;
+    updateSyncUi();
+    renderSubtitleTrack();
+  }catch(e){
+    console.warn('No se pudo cargar el subtítulo:', e);
+    const err = document.getElementById('subError');
+    err.textContent = `Couldn't load the "${lang}" subtitle (the link blocks browser access — try uploading it to Dropbox or OneDrive instead of Drive).`;
+    err.style.display = 'block';
+  }
+}
+
+let audioSyncOffset = 0;
+let audioCtx = null;
+let syncAudioEl = null;
+let syncAudioToken = 0;
+let lastNativeAudioCheck = 0;
+
+function audioTargetTime(){ return vjsPlayer ? Math.max(0, vjsPlayer.currentTime() - audioSyncOffset) : 0; }
+function stopSyncAudio(){
+  if (!syncAudioEl) return;
+  try{ syncAudioEl.pause(); }catch(e){}
+  try{ syncAudioEl.removeAttribute('src'); syncAudioEl.load(); }catch(e){}
+  syncAudioEl = null;
+}
+function setSyncAudioTime(){
+  if (!syncAudioEl || !vjsPlayer) return;
+  const target = audioTargetTime();
+  try{ syncAudioEl.currentTime = Number.isFinite(syncAudioEl.duration) ? Math.min(target, Math.max(0, syncAudioEl.duration - 0.05)) : target; }catch(e){}
+}
+function applyAudioSync(){
+  if (!syncAudioEl || !vjsPlayer) return;
+  setSyncAudioTime();
+  if (!vjsPlayer.paused()){
+    const p=syncAudioEl.play();
+    if(p&&typeof p.catch==='function') p.catch(()=>document.getElementById('audioUnlockWarn').style.display='flex');
+  } else syncAudioEl.pause();
+}
+function updateAudioSyncUi(){ document.getElementById('audioOffsetVal').textContent=audioSyncOffset.toFixed(1)+'s'; }
+let currentSyncRef=null;
+document.getElementById('audioUnlockBtn').addEventListener('click',async()=>{ try{setSyncAudioTime(); if(syncAudioEl) await syncAudioEl.play();}catch(e){} if(syncAudioEl&&!syncAudioEl.paused) document.getElementById('audioUnlockWarn').style.display='none'; });
+document.getElementById('audioSyncBar').addEventListener('click',(ev)=>{
+  const btn=ev.target.closest('[data-audioadj]'); if(!btn)return;
+  audioSyncOffset+=parseFloat(btn.dataset.audioadj); updateAudioSyncUi(); applyAudioSync();
+  if(currentSyncRef){ entries[currentSyncRef.idx].audios[currentSyncRef.audioIndex].offset=audioSyncOffset; saveEntries(); }
+});
+function onVjsTimeUpdateSync(){
+  if(!syncAudioEl||!vjsPlayer)return; const now=performance.now(); if(now-lastNativeAudioCheck<1500)return; lastNativeAudioCheck=now;
+  const target=audioTargetTime(); try{ if(Math.abs(syncAudioEl.currentTime-target)>0.35)syncAudioEl.currentTime=target; if(!vjsPlayer.paused()&&syncAudioEl.paused()){const p=syncAudioEl.play();if(p&&typeof p.catch==='function')p.catch(()=>{});}}catch(e){}
+}
+function stopSync(){
+  stopSyncAudio(); setMainMuted(false); toggleMainVolumeUi(false);
+  document.getElementById('audioSyncBar').style.display='none'; document.getElementById('audioUnlockWarn').style.display='none'; audioSyncOffset=0; currentSyncRef=null;
+  if(vjsPlayer){vjsPlayer.off('play',onVjsPlay);vjsPlayer.off('pause',onVjsPause);vjsPlayer.off('seeked',onVjsSeeked);vjsPlayer.off('timeupdate',onVjsTimeUpdateSync);}
+}
+function onVjsPlay(){applyAudioSync();}
+function onVjsPause(){if(syncAudioEl)syncAudioEl.pause();}
+function onVjsSeeked(){setSyncAudioTime();}
+async function startSync(mp3Url,savedOffset,ref){
+  if(!vjsPlayer)return; const token=++syncAudioToken; currentSyncRef=ref||null; setMainMuted(true); toggleMainVolumeUi(true); audioSyncOffset=savedOffset||0; updateAudioSyncUi(); document.getElementById('audioSyncBar').style.display='flex';
+  stopSyncAudio(); const audio=new Audio(); audio.preload='auto'; audio.src=resolveAnyDirectUrl(mp3Url); audio.volume=1; audio.setAttribute('playsinline',''); syncAudioEl=audio;
+  audio.addEventListener('error',()=>{if(token!==syncAudioToken||syncAudioEl!==audio)return;document.getElementById('audioSyncBar').style.display='none';alert('No se pudo reproducir el audio en inglés. El enlace MP3 no está entregando un archivo de audio reproducible al navegador.');},{once:true});
+  audio.addEventListener('loadedmetadata',()=>{if(token!==syncAudioToken||syncAudioEl!==audio)return;setSyncAudioTime();document.getElementById('audioUnlockWarn').style.display='none';applyAudioSync();});
+  audio.addEventListener('canplay',()=>{if(token!==syncAudioToken||syncAudioEl!==audio)return;applyAudioSync();},{once:true});
+  audio.load();
+  vjsPlayer.on('play',onVjsPlay);vjsPlayer.on('pause',onVjsPause);vjsPlayer.on('seeked',onVjsSeeked);vjsPlayer.on('timeupdate',onVjsTimeUpdateSync);
+}
+
+function disposePlayer(){
+  stopSync();
+  if (vjsPlayer){
+    try{ vjsPlayer.dispose(); }catch(e){}
+    vjsPlayer = null;
+  }
+}
+
+const OFFLINE_CACHE = 'mi-canal-offline-v1';
+const offlineSupported = ('caches' in window) && (location.protocol === 'https:' || location.hostname === 'localhost');
+
+async function isCached(url){
+  if (!offlineSupported) return false;
+  try{
+    const cache = await caches.open(OFFLINE_CACHE);
+    return !!(await cache.match(url));
+  }catch(e){ return false; }
+}
+
+async function getCachedBlobUrl(url){
+  try{
+    const cache = await caches.open(OFFLINE_CACHE);
+    const match = await cache.match(url);
+    if (!match) return null;
+    const blob = await match.blob();
+    return URL.createObjectURL(blob);
+  }catch(e){ return null; }
+}
+
+async function downloadForOffline(url, btn){
+  if (!offlineSupported){
+    alert('Offline mode needs the page to be published at a real link (like GitHub Pages) — it does not work by opening the file directly.');
+    return;
+  }
+  btn.textContent = '⏳ Downloading...';
+  btn.disabled = true;
+  try{
+    const cache = await caches.open(OFFLINE_CACHE);
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('respuesta no válida');
+    await cache.put(url, res);
+    btn.textContent = '✓ Available offline';
+    btn.disabled = false;
+  }catch(e){
+    console.warn('No se pudo descargar para offline:', e);
+    btn.textContent = '⚠ Failed (CORS-blocked link?)';
+    setTimeout(() => { btn.textContent = '📥 Watch offline'; btn.disabled = false; }, 3000);
+  }
+}
+
+async function removeOfflineCopy(url, btn){
+  try{
+    const cache = await caches.open(OFFLINE_CACHE);
+    await cache.delete(url);
+    btn.textContent = '📥 Watch offline';
+  }catch(e){}
+}
+
+function openPlayer(idx, randomFlow){
+  const e = entries[idx];
+  const audios = (e.audios && e.audios.length) ? e.audios : [{ lang: 'Original', url: e.url, subUrl: '', kind: 'video' }];
+  const firstInfo = parseVideoUrl(audios[0].url);
+
+  randomMode = !!randomFlow;
+  document.getElementById('pTitle').textContent = e.title;
+  document.getElementById('pMeta').textContent = `${e.type === 'foto' ? 'Photo' : 'Video'} · ${e.year || 'no date'}`;
+  document.getElementById('pDesc').textContent = e.description || '';
+  document.getElementById('player').classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  disposePlayer();
+  resetSubtitleState();
+  const audioBarEl = document.getElementById('audioBar');
+  const subBarEl = document.getElementById('subBar');
+  audioBarEl.innerHTML = '<span class="track-label" style="margin:0;">🔊 Audio</span>';
+  audioBarEl.style.display = 'none';
+  subBarEl.innerHTML = '<span class="track-label" style="margin:0;">💬 Subtitles</span>';
+  subBarEl.style.display = 'none';
+  document.getElementById('volumeBar').style.display = 'none';
+  document.getElementById('offlineBarWrap').innerHTML = '';
+  const mediaBox = document.getElementById('pMedia');
+  mediaBox.innerHTML = `<button class="player-close" id="pClose" aria-label="Cerrar"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M1 1L15 15M15 1L1 15" stroke="currentColor" stroke-width="1.6"/></svg></button>`;
+  document.getElementById('pClose').addEventListener('click', closePlayer);
+
+  if (firstInfo.type === 'direct'){
+    const vid = document.createElement('video-js');
+    vid.className = 'video-js vjs-big-play-centered';
+    vid.setAttribute('controls', '');
+    vid.style.width = '100%';
+    vid.style.height = '100%';
+    mediaBox.appendChild(vid);
+
+    vjsPlayer = videojs(vid, {
+      autoplay: true, fluid: false, preload: 'metadata',
+      html5: { nativeTextTracks: false },
+      controlBar: { children: ['playToggle','currentTimeDisplay','timeDivider','durationDisplay','progressControl','volumePanel','fullscreenToggle'] }
+    });
+    vjsPlayer.src([{ src: firstInfo.embed, type: 'video/mp4' }]);
+    getCachedBlobUrl(firstInfo.embed).then(blobUrl => {
+      if (blobUrl && vjsPlayer){
+        const t = vjsPlayer.currentTime();
+        vjsPlayer.src([{ src: blobUrl, type: 'video/mp4' }]);
+        vjsPlayer.one('loadedmetadata', () => vjsPlayer.currentTime(t));
+      }
+    });
+
+    const offlineWrap = document.getElementById('offlineBarWrap');
+    const offlineBtn = document.createElement('button');
+    offlineBtn.className = 'track-opt';
+    offlineBtn.style.cssText = 'background:rgba(255,255,255,0.06); padding:7px 14px;';
+    offlineBtn.textContent = offlineSupported ? '📥 Watch offline' : '📥 Offline (needs published link)';
+    isCached(firstInfo.embed).then(cached => { if (cached) offlineBtn.textContent = '✓ Available offline'; });
+    offlineBtn.addEventListener('click', async () => {
+      const cached = await isCached(firstInfo.embed);
+      if (cached){
+        if (confirm('Delete the offline copy of this episode?')) removeOfflineCopy(firstInfo.embed, offlineBtn);
+      } else {
+        downloadForOffline(firstInfo.embed, offlineBtn);
+      }
+    });
+    offlineWrap.appendChild(offlineBtn);
+
+    const volumeBar = document.getElementById('volumeBar');
+    const volumeSlider = document.getElementById('audioVolume');
+    const volumeVal = document.getElementById('audioVolumeVal');
+    volumeBar.style.display = 'flex';
+    volumeSlider.value = '1';
+    volumeVal.textContent = '100%';
+    const applyVolume = (v) => {
+      volumeVal.textContent = Math.round(v * 100) + '%';
+      if (syncAudioEl){ syncAudioEl.volume = Math.max(0, Math.min(1, v)); }
+      else if (vjsPlayer){ vjsPlayer.volume(Math.min(1, v)); }
+    };
+    volumeSlider.oninput = () => applyVolume(parseFloat(volumeSlider.value));
+
+    const defaultIdx = (e.defaultAudio === 2 && audios[1]) ? 1 : 0;
+    if (audios[defaultIdx].subUrl) attachSubtitle(audios[defaultIdx].subUrl, audios[defaultIdx].lang);
+
+    if (randomMode){
+      vjsPlayer.one('ended', () => playRandomEpisode());
+    }
+
+    if (audios.length > 1){
+      const bar = document.getElementById('audioBar');
+      bar.style.display = 'flex';
+
+      const activate = (a, aIdx, btnEl) => {
+        stopSync();
+        if (a.kind === 'audio'){
+          startSync(resolveAnyDirectUrl(a.url), a.offset || 0, { idx, audioIndex: aIdx });
+        } else {
+          const info2 = parseVideoUrl(a.url);
+          if (vjsPlayer.currentSrc() !== info2.embed){
+            const t = vjsPlayer.currentTime();
+            const wasPaused = vjsPlayer.paused();
+            vjsPlayer.src([{ src: info2.embed, type: 'video/mp4' }]);
+            const resumeAfterSwitch = () => {
+              try { vjsPlayer.currentTime(t); } catch(e) {}
+              if (!wasPaused) {
+                const p = vjsPlayer.play();
+                if (p && typeof p.catch === 'function') p.catch(() => {});
+              }
+            };
+            vjsPlayer.one('loadedmetadata', resumeAfterSwitch);
+            vjsPlayer.one('canplay', () => {
+              if (!wasPaused && vjsPlayer.paused()) {
+                const p = vjsPlayer.play();
+                if (p && typeof p.catch === 'function') p.catch(() => {});
+              }
+            });
+          }
+        }
+        bar.querySelectorAll('.track-opt').forEach(x => x.classList.remove('active'));
+        btnEl.classList.add('active');
+        volumeSlider.value = '1';
+        applyVolume(1);
+      };
+
+      const mainBtn = document.createElement('button');
+      mainBtn.className = 'track-opt' + (defaultIdx === 0 ? ' active' : '');
+      mainBtn.style.cssText = 'background:rgba(255,255,255,0.06); padding:7px 14px;';
+      mainBtn.textContent = '🔊 ' + audios[0].lang;
+      mainBtn.addEventListener('click', () => activate(audios[0], 0, mainBtn));
+      bar.appendChild(mainBtn);
+
+      audios.slice(1).forEach((a, i) => {
+        const b = document.createElement('button');
+        b.className = 'track-opt' + (defaultIdx === i + 1 ? ' active' : '');
+        b.style.cssText = 'background:rgba(255,255,255,0.06); padding:7px 14px;';
+        b.textContent = '🔊 ' + a.lang;
+        b.addEventListener('click', () => activate(a, i + 1, b));
+        bar.appendChild(b);
+
+        if (a.kind === 'audio'){
+          const combineBtn = document.createElement('button');
+          combineBtn.className = 'track-opt';
+          combineBtn.style.cssText = 'background:rgba(255,255,255,0.06); padding:7px 14px;';
+          combineBtn.textContent = '🔧 Combine into one file';
+          combineBtn.title = 'Downloads a single video file with this audio permanently merged in — no more live syncing needed';
+          combineBtn.addEventListener('click', () => {
+            const safeTitle = (e.title || 'episode').replace(/[^a-z0-9]+/gi, '-').toLowerCase();
+            combineAudioIntoVideo(firstInfo.embed, resolveAnyDirectUrl(a.url), a.offset || 0, safeTitle, combineBtn);
+          });
+          bar.appendChild(combineBtn);
+        }
+      });
+
+      if (defaultIdx === 1 && audios[1]){
+        vjsPlayer.one('loadedmetadata', () => {
+          activate(audios[1], 1, bar.children[2]);
+          const p = vjsPlayer.play();
+          if (p && typeof p.catch === 'function') p.catch(() => {});
+        });
+      }
+    }
+
+    const subOptions = audios.filter(a => a.subUrl);
+    if (subOptions.length){
+      const subBar = document.getElementById('subBar');
+      subBar.style.display = 'flex';
+
+      const noneBtn = document.createElement('button');
+      noneBtn.className = 'track-opt';
+      noneBtn.style.cssText = 'background:rgba(255,255,255,0.06); padding:7px 14px;';
+      noneBtn.textContent = 'Off';
+      noneBtn.addEventListener('click', () => {
+        resetSubtitleState();
+        subBar.querySelectorAll('.track-opt').forEach(x => x.classList.remove('active'));
+        noneBtn.classList.add('active');
+      });
+      subBar.appendChild(noneBtn);
+
+      subOptions.forEach(a => {
+        const isDefault = a.lang === audios[defaultIdx].lang && a.subUrl === audios[defaultIdx].subUrl;
+        const b = document.createElement('button');
+        b.className = 'track-opt' + (isDefault ? ' active' : '');
+        b.style.cssText = 'background:rgba(255,255,255,0.06); padding:7px 14px;';
+        b.textContent = '💬 ' + a.lang;
+        b.addEventListener('click', () => {
+          attachSubtitle(a.subUrl, a.lang);
+          subBar.querySelectorAll('.track-opt').forEach(x => x.classList.remove('active'));
+          b.classList.add('active');
+        });
+        subBar.appendChild(b);
+      });
+    }
+  } else {
+    mediaBox.innerHTML += mediaHtml(firstInfo, true);
+    if (audios.length > 1){
+      const note = document.createElement('p');
+      note.className = 'player-meta';
+      note.style.cssText = 'margin:14px 0 0; background:rgba(255,255,255,0.06); padding:8px 10px; border-radius:6px;';
+      note.textContent = 'This link does not support live audio switching (the main video must be a direct link: OneDrive, Dropbox or .mp4).';
+      document.getElementById('offlineBarWrap').appendChild(note);
+    }
+  }
+}
+function closePlayer(){
+  document.getElementById('player').classList.remove('open');
+  randomMode = false;
+  disposePlayer();
+  document.getElementById('pMedia').innerHTML = '';
+  document.body.style.overflow = '';
+}
+document.getElementById('player').addEventListener('click', (ev) => {
+  if (ev.target.id === 'player') closePlayer();
+});
+document.addEventListener('keydown', (ev) => {
+  if (ev.key === 'Escape') closePlayer();
+});
+
+/* remote-style arrow navigation across tiles */
+function getTiles(){
+  return Array.from(document.querySelectorAll('.tile, #heroPlay'));
+}
+document.addEventListener('keydown', (ev) => {
+  const tag = (document.activeElement.tagName || '').toLowerCase();
+  if (['input','textarea','select'].includes(tag)) return;
+  if (!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(ev.key)) return;
+  const tiles = getTiles();
+  if (!tiles.length) return;
+  let idx = tiles.indexOf(document.activeElement);
+  if (idx === -1){ tiles[0].focus(); ev.preventDefault(); return; }
+  const cur = tiles[idx].getBoundingClientRect();
+  ev.preventDefault();
+  if (ev.key === 'ArrowRight') idx = Math.min(idx+1, tiles.length-1);
+  else if (ev.key === 'ArrowLeft') idx = Math.max(idx-1, 0);
+  else {
+    const down = ev.key === 'ArrowDown';
+    let best=null, bestDist=Infinity;
+    tiles.forEach((t,i) => {
+      const r = t.getBoundingClientRect();
+      const isCandidate = down ? r.top > cur.top + 5 : r.top < cur.top - 5;
+      if (isCandidate){
+        const dist = Math.abs(r.left-cur.left) + Math.abs(r.top-cur.top)*0.05;
+        if (dist < bestDist){ bestDist = dist; best = i; }
+      }
+    });
+    if (best !== null) idx = best;
+  }
+  tiles[idx].focus();
+});
+
+/* filter tabs */
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    currentFilter = tab.dataset.filter;
+    render();
+  });
+});
+document.getElementById('randomBtn').addEventListener('click', () => playRandomEpisode());
+
+let pendingThumbDataUrl = null;
+let clearThumbOnSave = false;
+let pendingHalloweenThumbDataUrl = null;
+let clearHalloweenThumbOnSave = false;
+let editingThemeCover = 'halloween';
+
+document.getElementById('fThumbFile').addEventListener('change', (ev) => {
+  const file = ev.target.files[0];
+  if (!file){ pendingThumbDataUrl = null; return; }
+  const reader = new FileReader();
+  reader.onload = () => {
+    const img = new Image();
+    img.onload = () => {
+      // Keep uploaded covers sharp: downscale only when necessary.
+      // Preserve aspect ratio and use high-quality JPEG compression.
+      const maxW = 1280;
+      const maxH = 720;
+      const scale = Math.min(1, maxW / img.width, maxH / img.height);
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.max(1, Math.round(img.width * scale));
+      canvas.height = Math.max(1, Math.round(img.height * scale));
+      const ctx = canvas.getContext('2d', {alpha:false});
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      ctx.fillStyle = '#101018';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      pendingThumbDataUrl = canvas.toDataURL('image/jpeg', 0.92);
+      clearThumbOnSave = false;
+    };
+    img.src = reader.result;
+  };
+  reader.readAsDataURL(file);
+});
+
+function prepareThemedThumb(file){
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=()=>{
+    const img=new Image();
+    img.onload=()=>{
+      const maxW=1280,maxH=720;
+      const scale=Math.min(1,maxW/img.width,maxH/img.height);
+      const canvas=document.createElement('canvas');
+      canvas.width=Math.max(1,Math.round(img.width*scale));
+      canvas.height=Math.max(1,Math.round(img.height*scale));
+      const ctx=canvas.getContext('2d',{alpha:false});
+      ctx.imageSmoothingEnabled=true;
+      ctx.imageSmoothingQuality='high';
+      ctx.fillStyle='#101018';
+      ctx.fillRect(0,0,canvas.width,canvas.height);
+      ctx.drawImage(img,0,0,canvas.width,canvas.height);
+      pendingHalloweenThumbDataUrl=canvas.toDataURL('image/jpeg',.92);
+      clearHalloweenThumbOnSave=false;
+      const st=document.getElementById('halloweenCoverStatus');
+      if(st)st.textContent=themeCoverMeta(editingThemeCover).label+' cover ready to save.';
+    };
+    img.src=reader.result;
+  };
+  reader.readAsDataURL(file);
+}
+const halloweenFile=document.getElementById('fHalloweenCoverFile');
+if(halloweenFile)halloweenFile.addEventListener('change',ev=>prepareThemedThumb(ev.target.files[0]));
+
+function resetThumbState(){
+  pendingThumbDataUrl = null;
+  editingThemeCover = activeDecorationTheme();
+  clearThumbOnSave = false;
+  pendingHalloweenThumbDataUrl = null;
+  clearHalloweenThumbOnSave = false;
+  document.getElementById('fThumbFile').value = '';
+  document.getElementById('fThumbUrl').value = '';
+  const hf=document.getElementById('fHalloweenCoverFile'); if(hf)hf.value='';
+  const hu=document.getElementById('fHalloweenCoverUrl'); if(hu)hu.value='';
+  const he=document.getElementById('fHalloweenCoverEnabled'); if(he)he.checked=false;
+  const hs=document.getElementById('halloweenCoverStatus'); if(hs)hs.textContent='';
+  const hp=document.getElementById('halloweenCoverPanel'); if(hp)hp.style.display='none';
+  if(toggleHalloweenCover)toggleHalloweenCover.textContent='🎃 Change Halloween cover';
+}
+
+/* add panel */
+const toggleAdd = document.getElementById('toggleAdd');
+const addPanel = document.getElementById('addPanel');
+let editingIdx = null;
+
+toggleAdd.addEventListener('click', () => {
+  editingIdx = null;
+  addPanel.reset();
+  resetThumbState();
+  editingThemeCover=activeDecorationTheme();
+  syncThemedCoverEditor(null);
+  document.getElementById('audio2Block').style.display = 'none';
+  document.getElementById('toggleAudio2').textContent = '+ Add second language';
+  document.querySelector('#addPanel h3').textContent = 'New show';
+  document.querySelector('#addPanel button[type=submit]').textContent = 'Save';
+  const isOpen = addPanel.classList.toggle('open');
+  toggleAdd.setAttribute('aria-expanded', isOpen);
+});
+document.getElementById('cancelAdd').addEventListener('click', () => {
+  addPanel.classList.remove('open');
+  toggleAdd.setAttribute('aria-expanded','false');
+  addPanel.reset();
+  resetThumbState();
+  editingIdx = null;
+});
+document.getElementById('toggleAudio2').addEventListener('click', () => {
+  const block = document.getElementById('audio2Block');
+  const isOpen = block.style.display === 'block';
+  block.style.display = isOpen ? 'none' : 'block';
+  document.getElementById('toggleAudio2').textContent = isOpen ? '+ Add second language' : '– Remove second language';
+});
+const toggleHalloweenCover=document.getElementById('toggleHalloweenCover');
+if(toggleHalloweenCover)toggleHalloweenCover.addEventListener('click',()=>{
+  const panel=document.getElementById('halloweenCoverPanel');
+  if(!panel)return;
+  const open=panel.style.display==='block';
+  panel.style.display=open?'none':'block';
+  const meta=themeCoverMeta(editingThemeCover);
+  toggleHalloweenCover.textContent=open?meta.sticker+' Change '+meta.label+' cover':meta.sticker+' Hide '+meta.label+' cover options';
+});
+const clearHalloweenCover=document.getElementById('clearHalloweenCover');
+if(clearHalloweenCover)clearHalloweenCover.addEventListener('click',()=>{
+  pendingHalloweenThumbDataUrl=null;
+  clearHalloweenThumbOnSave=true;
+  const hf=document.getElementById('fHalloweenCoverFile'); if(hf)hf.value='';
+  const hu=document.getElementById('fHalloweenCoverUrl'); if(hu)hu.value='';
+  const he=document.getElementById('fHalloweenCoverEnabled'); if(he)he.checked=false;
+  const hs=document.getElementById('halloweenCoverStatus'); if(hs){const meta=themeCoverMeta(editingThemeCover);hs.textContent=meta.label+' cover will be removed when you save.';}
+});
+
+
+function openEditForm(idx){
+  if (typeof isAdmin !== 'undefined' && !isAdmin) return;
+  const e = entries[idx];
+  editingIdx = idx;
+  resetThumbState();
+  document.getElementById('fThumbUrl').value = e.thumbUrl || '';
+  editingThemeCover=activeDecorationTheme();
+  syncThemedCoverEditor(e);
+  const audios = (e.audios && e.audios.length) ? e.audios : [{ lang:'Original', url: e.url, subUrl:'', kind:'video' }];
+
+  document.getElementById('fTitle').value = e.title || '';
+  document.getElementById('fYear').value = e.year || '';
+  document.getElementById('fSeason').value = e.season || '';
+  document.getElementById('fEpisode').value = e.episode || '';
+  document.getElementById('fType').value = e.type || 'video';
+  document.getElementById('fDesc').value = e.description || '';
+  document.getElementById('fLang1').value = audios[0].lang || 'Español';
+  document.getElementById('fUrl1').value = audios[0].url || '';
+  document.getElementById('fSub1').value = audios[0].subUrl || '';
+  document.getElementById('fDefaultAudio').value = String(e.defaultAudio || 1);
+
+  const block = document.getElementById('audio2Block');
+  if (audios[1]){
+    document.getElementById('fLang2').value = audios[1].lang || 'Inglés';
+    document.getElementById('fUrl2').value = audios[1].url || '';
+    document.getElementById('fSub2').value = audios[1].subUrl || '';
+    document.getElementById('fKind2').value = audios[1].kind || 'audio';
+    block.style.display = 'block';
+    document.getElementById('toggleAudio2').textContent = '– Remove second language';
+  } else {
+    document.getElementById('fLang2').value = 'Inglés';
+    document.getElementById('fUrl2').value = '';
+    document.getElementById('fSub2').value = '';
+    block.style.display = 'none';
+    document.getElementById('toggleAudio2').textContent = '+ Add second language';
+  }
+
+  document.querySelector('#addPanel h3').textContent = `Editing: ${e.title}`;
+  document.querySelector('#addPanel button[type=submit]').textContent = 'Save changes';
+  addPanel.classList.add('open');
+  toggleAdd.setAttribute('aria-expanded', 'true');
+  addPanel.scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+addPanel.addEventListener('submit', (ev) => {
+  ev.preventDefault();
+  const title = document.getElementById('fTitle').value.trim();
+  const year = document.getElementById('fYear').value.trim();
+  const type = document.getElementById('fType').value;
+  const description = document.getElementById('fDesc').value.trim();
+  const season = parseInt(document.getElementById('fSeason').value, 10) || null;
+  const episode = parseInt(document.getElementById('fEpisode').value, 10) || null;
+  const msg = document.getElementById('formMsg');
+
+  const lang1 = document.getElementById('fLang1').value.trim() || 'Original';
+  const url1 = document.getElementById('fUrl1').value.trim();
+  const sub1 = document.getElementById('fSub1').value.trim();
+  const lang2 = document.getElementById('fLang2').value.trim() || 'Language 2';
+  const url2 = document.getElementById('fUrl2').value.trim();
+  const sub2 = document.getElementById('fSub2').value.trim();
+  const kind2 = document.getElementById('fKind2').value;
+  const defaultAudio = parseInt(document.getElementById('fDefaultAudio').value, 10) || 1;
+
+  if (!title || !url1){ msg.textContent = 'Missing title or main link.'; return; }
+
+  const audios = [{ lang: lang1, url: url1, subUrl: sub1, kind: 'video' }];
+  if (url2) audios.push({ lang: lang2, url: url2, subUrl: sub2, kind: kind2 });
+
+  const previous = editingIdx !== null ? entries[editingIdx] : null;
+  const record = { title, year, type, description, audios, url: url1, season, episode, defaultAudio };
+  if(previous){
+    if(previous.thumb)record.thumb=previous.thumb;
+    if(previous.thumbUrl)record.thumbUrl=previous.thumbUrl;
+    record.themeCovers=migrateThemeCovers(previous);
+  } else record.themeCovers={};
+
+  const thumbUrl = document.getElementById('fThumbUrl').value.trim();
+  record.thumbUrl = thumbUrl;
+  if (pendingThumbDataUrl){
+    record.thumb = pendingThumbDataUrl;
+  } else if (editingIdx !== null){
+    record.thumb = entries[editingIdx].thumb || null;
+  }
+
+  const themedCoverUrl = document.getElementById('fHalloweenCoverUrl').value.trim();
+  const themedCoverEnabled = document.getElementById('fHalloweenCoverEnabled').checked;
+  record.themeCovers = record.themeCovers || {};
+  const existingCover = record.themeCovers[editingThemeCover] || {};
+  if(clearHalloweenThumbOnSave){
+    delete record.themeCovers[editingThemeCover];
+  } else {
+    record.themeCovers[editingThemeCover] = {
+      thumb: pendingHalloweenThumbDataUrl || existingCover.thumb || null,
+      url: themedCoverUrl,
+      enabled: themedCoverEnabled
+    };
+  }
+  // Keep the old Halloween fields for backward compatibility with older backups/cloud state.
+  if(editingThemeCover==='halloween'){
+    const hc=record.themeCovers.halloween||{};
+    record.halloweenThumb=hc.thumb||null; record.halloweenThumbUrl=hc.url||''; record.halloweenThumbEnabled=hc.enabled===true;
+  }
+
+  if (editingIdx !== null){
+    entries[editingIdx] = record;
+  } else {
+    entries.unshift(record);
+  }
+  saveEntries();
+  render();
+  addPanel.reset();
+  resetThumbState();
+  editingIdx = null;
+  document.getElementById('audio2Block').style.display = 'none';
+  document.getElementById('toggleAudio2').textContent = '+ Add second language';
+  document.querySelector('#addPanel h3').textContent = 'New show';
+  document.querySelector('#addPanel button[type=submit]').textContent = 'Save';
+  addPanel.classList.remove('open');
+  toggleAdd.setAttribute('aria-expanded','false');
+  msg.textContent = '';
+});
+
+/* export / import */
+document.getElementById('exportBtn').addEventListener('click', () => {
+  const blob = new Blob([JSON.stringify(entries, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'mi-canal-respaldo.json'; a.click();
+  URL.revokeObjectURL(url);
+});
+document.getElementById('importBtn').addEventListener('click', () => {
+  document.getElementById('importFile').click();
+});
+document.getElementById('importFile').addEventListener('change', (ev) => {
+  const file = ev.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try{
+      const imported = JSON.parse(reader.result);
+      if (!Array.isArray(imported)) throw new Error('formato inválido');
+      entries = imported;
+      saveEntries();
+      render();
+    }catch(e){
+      alert('That backup file is not valid.');
+    }
+  };
+  reader.readAsText(file);
+});
+
+loadConfig();
+loadEntries();
+</script>
+
+<div id="adminModal" class="admin-modal"><div class="admin-box"><h3>Admin access</h3><div class="field"><label>Email</label><input id="adminEmail" type="text" autocomplete="username"></div><div class="field"><label>Password</label><input id="adminPassword" type="password" autocomplete="current-password"></div><div class="form-actions"><button id="adminSignIn" class="btn" type="button">Sign in</button><button id="adminSignOut" class="btn ghost" type="button">Sign out</button><button id="adminCancel" class="btn ghost" type="button">Close</button></div><p id="adminMsg" class="form-msg"></p></div></div>
+<script>
+/* JOHNGer: Supabase cloud state, admin access, collections, language and image quality */
+(function(){
+  const SUPABASE_URL='https://xjjqvftwgxzbjzzihrmm.supabase.co';
+  const SUPABASE_KEY='sb_publishable_WTRlP0TLd-z77frYNJlcrQ_poWujHKX';
+  const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+  let cloudApplying=false, saveTimer=null, isAdmin=false, collections=[];
+  const stateId='main';
+  const $=id=>document.getElementById(id);
+  const status=$('cloudStatus');
+  function setStatus(t,ok=true){status.textContent=t;status.className='cloud-status '+(ok?'ok':'bad');}
+  function getState(){let e=[],c={},d={};try{e=JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]')}catch{}try{c=JSON.parse(localStorage.getItem(CONFIG_KEY)||'{}')}catch{}try{d=JSON.parse(localStorage.getItem(DECORATION_KEY)||'{}')}catch{}return {entries:e,seriesConfig:c,collections,lang:localStorage.getItem('jg-lang')||'en',decoration:d};}
+  function applyState(data){if(!data)return;cloudApplying=true;try{if(Array.isArray(data.entries))localStorage.setItem(STORAGE_KEY,JSON.stringify(data.entries));if(data.seriesConfig)localStorage.setItem(CONFIG_KEY,JSON.stringify(data.seriesConfig));if(data.decoration)localStorage.setItem(DECORATION_KEY,JSON.stringify(data.decoration));collections=Array.isArray(data.collections)?data.collections:[];if(data.lang)localStorage.setItem('jg-lang',data.lang);loadConfig();loadEntries();loadDecoration();applyDecoration();renderCollections();applyLanguage();}finally{cloudApplying=false}}
+  async function cloudSave(){if(!isAdmin||cloudApplying)return;clearTimeout(saveTimer);saveTimer=setTimeout(async()=>{try{const data=getState();const {error}=await sb.from('portfolio_state').upsert({id:stateId,data,updated_at:new Date().toISOString()},{onConflict:'id'});if(error)throw error;setStatus('SYNCED',true)}catch(e){console.error(e);setStatus('SYNC ERROR',false)}},450)}
+  const oldSet=Storage.prototype.setItem;Storage.prototype.setItem=function(k,v){const r=oldSet.call(this,k,v);if(!cloudApplying&&(k===STORAGE_KEY||k===CONFIG_KEY||k===DECORATION_KEY||k==='jg-lang'))cloudSave();return r};
+  async function pull(){try{const {data,error}=await sb.from('portfolio_state').select('data,updated_at').eq('id',stateId).maybeSingle();if(error)throw error;if(data&&data.data&&Object.keys(data.data).length){applyState(data.data);return true}setStatus(isAdmin?'ADMIN • CLOUD EMPTY':'CLOUD EMPTY',true);return false}catch(e){console.error('Supabase read failed:',e);setStatus('CLOUD OFFLINE',false);return false}}
+  async function authRefresh(){try{const {data}=await sb.auth.getSession();isAdmin=!!data.session;document.body.classList.toggle('admin-on',isAdmin);['agregar','toggleAdd','toggleConfig','toggleDecoration','exportBtn','importBtn','addPanel','configPanel','decorationPanel'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.toggle('admin-only',!isAdmin)});setStatus(isAdmin?'ADMIN • SYNCING':'CLOUD SYNCING',true);const cloudHadData=await pull();
+      // First admin login can migrate existing local episodes/config to the cloud if the cloud row is empty.
+      if(isAdmin&&!cloudHadData){let localEntries=[];try{localEntries=JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]')}catch{};if(localEntries.length||seriesConfig.seasons||collections.length||decorationConfig.theme!=='none'){await new Promise(r=>setTimeout(r,50));await cloudSave();}}
+      setStatus(isAdmin?'ADMIN • SYNCED':'CLOUD READY',true);
+    }catch(e){console.error('Admin/cloud init failed:',e);document.body.classList.remove('admin-on');isAdmin=false;setStatus('CLOUD ERROR',false)}}
+  async function signIn(){const email=$('adminEmail').value.trim(),password=$('adminPassword').value;const {error}=await sb.auth.signInWithPassword({email,password});if(error){$('adminMsg').textContent=error.message;return}$('adminMsg').textContent='Signed in.';$('adminModal').classList.remove('open');await authRefresh()}
+  $('adminSignIn').onclick=signIn;$('adminSignOut').onclick=async()=>{await sb.auth.signOut();isAdmin=false;document.body.classList.remove('admin-on');$('adminModal').classList.remove('open');setStatus('CLOUD READY',true);renderCollections()};$('adminCancel').onclick=()=> $('adminModal').classList.remove('open');$('adminLoginBtn').onclick=()=> $('adminModal').classList.add('open');
+  let pressTimer;const logo=document.querySelector('.logo');if(logo){logo.addEventListener('pointerdown',()=>{clearTimeout(pressTimer);pressTimer=setTimeout(()=>{$('adminModal').classList.add('open')},500)});['pointerup','pointercancel','pointerleave'].forEach(e=>logo.addEventListener(e,()=>clearTimeout(pressTimer)));logo.addEventListener('contextmenu',e=>e.preventDefault())}document.addEventListener('keydown',e=>{if(e.ctrlKey&&e.shiftKey&&e.key.toLowerCase()==='a'){$('adminModal').classList.add('open')}});
+  function themeClass(t){return 'collection-theme-'+(t||'custom')}
+  let collectionAutoTimer=null, collectionScrollCleanup=null, selectedCollectionIndex=null;
+  function collectionItems(c){
+    return (c.entryIds||[]).map(id=>entries.find(e=>e.id===id)||entries[Number(id)]).filter(Boolean);
+  }
+  function renderCollectionViewer(){
+    const viewer=$('collectionViewer'), list=$('collectionViewerEpisodes');
+    if(!viewer||selectedCollectionIndex==null||!collections[selectedCollectionIndex]){if(viewer)viewer.style.display='none';return}
+    const c=collections[selectedCollectionIndex];
+    if(!isAdmin && c.visible===false){viewer.style.display='none';return}
+    const items=collectionItems(c);
+    viewer.style.display='block';
+    $('collectionViewerTitle').textContent=(c.name||'Collection');
+    $('collectionViewerMeta').textContent=items.length+' episode'+(items.length===1?'':'s');
+    if(!items.length){
+      list.innerHTML='<div class="collection-empty">This collection has no episodes yet.</div>';
+      return;
+    }
+    list.innerHTML=items.map((e)=>{
+      const idx=entries.indexOf(e);
+      const src=getEpisodeThumb(e);
+      const bg=src?`background-image:url('${src}')`:`background-color:${toneFor(e.title||'x')}`;
+      const code=(e.season?'T'+e.season+'E'+(e.episode||'?'):'Episode');
+      return `<article class="collection-episode-card" tabindex="0" role="button" data-cv-idx="${idx}" aria-label="Play ${escapeHtml(e.title||'Episode')}">
+        <div class="collection-episode-thumb" style="${bg}"><div class="collection-episode-play"><span>▶</span></div></div>
+        <div class="collection-episode-body"><div class="collection-episode-code">${escapeHtml(code)}</div><div class="collection-episode-title">${escapeHtml(e.title||'Untitled')}</div>${e.description?`<div class="collection-episode-desc">${escapeHtml(e.description)}</div>`:''}</div>
+      </article>`;
+    }).join('');
+    list.querySelectorAll('[data-cv-idx]').forEach(card=>{
+      const open=()=>openPlayer(Number(card.dataset.cvIdx));
+      card.addEventListener('click',open);
+      card.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open();}});
+    });
+  }
+  function showCollection(index){
+    if(index<0||index>=collections.length)return;
+    const c=collections[index];
+    if(!isAdmin&&c.visible===false)return;
+    selectedCollectionIndex=index;
+    renderCollectionViewer();
+  }
+  $('collectionViewerClose').onclick=()=>{selectedCollectionIndex=null;renderCollectionViewer()};
+  function renderCollections(){
+    const sec=$('collectionsSection'),wrap=$('collectionsWrap');
+    const visibleCollections=collections.map((c,i)=>({c,i})).filter(x=>isAdmin||x.c.visible!==false);
+    if(!isAdmin && !visibleCollections.length){sec.style.display='none';selectedCollectionIndex=null;renderCollectionViewer();return}
+    sec.style.display='block';
+    clearInterval(collectionAutoTimer); collectionAutoTimer=null;
+    if(collectionScrollCleanup){collectionScrollCleanup();collectionScrollCleanup=null}
+    if(selectedCollectionIndex!=null){
+      const selected=collections[selectedCollectionIndex];
+      if(!selected||(!isAdmin&&selected.visible===false))selectedCollectionIndex=null;
+    }
+    if(!visibleCollections.length){
+      wrap.innerHTML='<div style="padding:22px;border:1px dashed var(--line);border-radius:14px;color:var(--muted);font-family:Space Mono,monospace;font-size:.78rem;">No collections yet. Create one with the button above.</div>';
+      renderCollectionViewer();
+      return;
+    }
+    wrap.innerHTML='<button class="collection-arrow left" type="button" aria-label="Previous collection" data-col-prev>‹</button><div class="collection-scroll" id="collectionScroller">'+visibleCollections.map(({c,i})=>{
+      const items=collectionItems(c);
+      const bg=items[0]&&getEpisodeThumb(items[0]);
+      const themeIcon={summer:'☀️',halloween:'🎃',christmas:'🎄',winter:'❄️',easter:'🐣',valentine:'❤️',custom:'✨'}[c.theme]||'✨';
+      return `<article class="collection-card ${themeClass(c.theme)} ${c.visible===false?'collection-hidden':''}" data-col="${i}">${bg?`<div class="collection-bg" style="background-image:url('${bg}')"></div>`:''}<div class="collection-content"><div class="collection-title">${themeIcon} ${escapeHtml(c.name)}</div><div class="collection-meta">${items.length} item${items.length===1?'':'s'}${c.theme?' · '+escapeHtml(c.theme):''}${c.visible===false?' · Hidden':''}</div></div><div class="collection-admin admin-only"><button data-cedit="${i}">Edit</button><button data-ctoggle="${i}">${c.visible===false?'Show':'Hide'}</button></div></article>`
+    }).join('')+'</div><button class="collection-arrow right" type="button" aria-label="Next collection" data-col-next>›</button><div class="collection-dots" role="tablist" aria-label="Collections">'+visibleCollections.map((_,i)=>`<button class="collection-dot ${i===0?'active':''}" type="button" aria-label="Collection ${i+1}" data-col-dot="${i}"></button>`).join('')+'</div>';
+    const scroller=$('collectionScroller'),cards=[...wrap.querySelectorAll('.collection-card')],dots=[...wrap.querySelectorAll('[data-col-dot]')];
+    let active=0, scrollTimer=null, paused=false;
+    const setActive=(idx)=>{active=Math.max(0,Math.min(cards.length-1,idx));dots.forEach((d,i)=>d.classList.toggle('active',i===active));dots.forEach((d,i)=>d.setAttribute('aria-selected',i===active?'true':'false'))};
+    const cardLeft=(idx)=>{const card=cards[idx];return card ? Math.max(0,card.offsetLeft-(scroller.clientWidth-card.offsetWidth)/2) : 0};
+    const go=(idx)=>{
+      if(!cards.length)return;
+      const wrapped=idx<0||idx>=cards.length;
+      idx=(idx+cards.length)%cards.length;
+      setActive(idx);
+      // Do NOT use scrollIntoView here: it can also scroll the page vertically when
+      // the carousel is being auto-advanced. Only move the horizontal scroller.
+      scroller.scrollTo({left:cardLeft(idx),behavior:wrapped?'auto':'smooth'});
+    };
+    wrap.querySelector('[data-col-prev]').onclick=e=>{e.stopPropagation();go(active-1)};
+    wrap.querySelector('[data-col-next]').onclick=e=>{e.stopPropagation();go(active+1)};
+    dots.forEach((d,i)=>d.onclick=e=>{e.stopPropagation();go(i)});
+    let swipeX=0,swipeY=0,swipeTracking=false;
+    scroller.addEventListener('touchstart',e=>{const t=e.touches&&e.touches[0];if(!t)return;swipeX=t.clientX;swipeY=t.clientY;swipeTracking=true;paused=true},{passive:true});
+    scroller.addEventListener('touchend',e=>{if(!swipeTracking)return;swipeTracking=false;const t=e.changedTouches&&e.changedTouches[0];if(!t){paused=false;return;}const dx=t.clientX-swipeX,dy=t.clientY-swipeY;if(Math.abs(dx)>45&&Math.abs(dx)>Math.abs(dy)*1.15){e.preventDefault();if(dx<0)go(active-1);else go(active+1);}else updateFromScroll();setTimeout(()=>paused=false,1200)},{passive:false});
+    wrap.querySelectorAll('[data-cedit]').forEach(b=>b.onclick=e=>{e.stopPropagation();openCollection(+b.dataset.cedit)});
+    wrap.querySelectorAll('[data-ctoggle]').forEach(b=>b.onclick=e=>{e.stopPropagation();collections[+b.dataset.ctoggle].visible=collections[+b.dataset.ctoggle].visible===false;renderCollections();cloudSave()});
+    cards.forEach(card=>card.onclick=()=>showCollection(Number(card.dataset.col)));
+    const updateFromScroll=()=>{clearTimeout(scrollTimer);scrollTimer=setTimeout(()=>{let best=0,bestDist=Infinity;cards.forEach((card,i)=>{const dist=Math.abs(card.offsetLeft-(scroller.scrollLeft+(scroller.clientWidth-card.offsetWidth)/2));if(dist<bestDist){bestDist=dist;best=i}});setActive(best)},80)};
+    scroller.addEventListener('scroll',updateFromScroll,{passive:true});
+    const pause=()=>{paused=true};const resume=()=>{paused=false};
+    wrap.addEventListener('pointerenter',pause);wrap.addEventListener('pointerleave',resume);wrap.addEventListener('focusin',pause);wrap.addEventListener('focusout',resume);
+    collectionAutoTimer=setInterval(()=>{if(!paused&&cards.length>1)go(active+1)},5000);
+    collectionScrollCleanup=()=>{clearTimeout(scrollTimer);clearInterval(collectionAutoTimer);collectionAutoTimer=null};
+    setActive(0);renderCollectionViewer();
+  }
+  function fillEntrySelect(){const s=$('colEntries');s.innerHTML=entries.map((e,i)=>`<option value="${e.id||i}">${escapeHtml(e.season?'S'+e.season+'E'+(e.episode||'?')+' · ':'')}${escapeHtml(e.title||'Untitled')}</option>`).join('')}
+  let editCol=null;function openCollection(i=null){editCol=i;fillEntrySelect();const c=i==null?{name:'',theme:'summer',entryIds:[],visible:true}:collections[i];$('colName').value=c.name||'';$('colTheme').value=c.theme||'summer';Array.from($('colEntries').options).forEach(o=>o.selected=(c.entryIds||[]).map(String).includes(o.value));$('collectionForm').classList.add('open')}
+  $('newCollectionBtn').onclick=()=>openCollection();$('cancelCollectionBtn').onclick=()=>$('collectionForm').classList.remove('open');$('saveCollectionBtn').onclick=()=>{const c={name:$('colName').value.trim()||'Collection',theme:$('colTheme').value,entryIds:Array.from($('colEntries').selectedOptions).map(o=>o.value),visible:true};if(editCol==null)collections.push(c);else{c.visible=collections[editCol].visible!==false;collections[editCol]=c}$('collectionForm').classList.remove('open');renderCollections();cloudSave()};
+  $('langBtn').onclick=()=>{const n=(localStorage.getItem('jg-lang')||'en')==='en'?'es':'en';localStorage.setItem('jg-lang',n);applyLanguage()};
+  function applyLanguage(){
+    const l=localStorage.getItem('jg-lang')||'en';
+    $('langBtn').textContent=l.toUpperCase();if($('toggleDecoration'))$('toggleDecoration').textContent=(l==='es'?'🎨 Decorar web':'🎨 Decorate website');
+    document.documentElement.lang=l;
+    const dict={
+      en:{
+        footerIntro:'Watch is a free browser guide to television and film items hosted on the Internet Archive — animation, sitcoms, Saturday morning cartoons, and classic films. No account or app install required.',
+        footerPlayback:'Episodes stream as browser-friendly MP4 video. The player supports TV remote and keyboard navigation, resume progress, optional captions, offline saves, Chromecast, and AirPlay. This site only organizes and links to Archive items; it does not host the video files.',
+        footerRights:'Availability and rights follow each Archive.org item. Listings can change or be removed when Archive takes action; this page is not a license grant and does not claim every title is public domain.',
+        series:'Series',season:'Season',seasons:'Seasons',episode:'Episode',episodes:'Episodes',video:'Video',photos:'Photos',recently:'Recently added',collections:'Collections',collection:'Collection',back:'Back to collections',play:'Play',language:'Language',english:'English',spanish:'Spanish',random:'Random',all:'All',empty:'No episodes added yet.',noCollections:'No collections yet. Create one with the button above.',hidden:'Hidden',show:'Show',hide:'Hide',edit:'Edit',delete:'Delete',off:'Off',subtitle:'Subtitles',description:'Description',original:'Original',newShow:'New show',save:'Save',cancel:'Cancel',configure:'Configure seasons',decorate:'Decorate website'
+      },
+      es:{
+        footerIntro:'Watch es una guía gratuita para el navegador que organiza contenidos de televisión y cine alojados en Internet Archive — animación, sitcoms, dibujos animados de los sábados por la mañana y películas clásicas. No se necesita una cuenta ni instalar una aplicación.',
+        footerPlayback:'Los episodios se reproducen como video MP4 compatible con el navegador. El reproductor admite navegación con control remoto de TV y teclado, reanudación del progreso, subtítulos opcionales, guardado sin conexión, Chromecast y AirPlay. Este sitio solo organiza y enlaza contenidos de Archive; no aloja los archivos de video.',
+        footerRights:'La disponibilidad y los derechos dependen de cada elemento de Archive.org. Los listados pueden cambiar o desaparecer cuando Archive toma medidas; esta página no concede ninguna licencia ni afirma que todos los títulos sean de dominio público.',
+        series:'Series',season:'Temporada',seasons:'Temporadas',episode:'Episodio',episodes:'Episodios',video:'Video',photos:'Fotos',recently:'Agregado recientemente',collections:'Colecciones',collection:'Colección',back:'Volver a colecciones',play:'Reproducir',language:'Idioma',english:'Inglés',spanish:'Español',random:'Aleatorio',all:'Todo',empty:'Todavía no hay episodios agregados.',noCollections:'Todavía no hay colecciones. Crea una con el botón de arriba.',hidden:'Oculta',show:'Mostrar',hide:'Ocultar',edit:'Editar',delete:'Eliminar',off:'Desactivado',subtitle:'Subtítulos',description:'Descripción',original:'Original',newShow:'Nuevo show',save:'Guardar',cancel:'Cancelar',configure:'Configurar temporadas',decorate:'Decorar web'
+      }
+    };
+    const d=dict[l]||dict.en;
+    document.querySelectorAll('[data-i18n]').forEach(el=>{const k=el.dataset.i18n;if(d[k]!=null)el.textContent=d[k];});
+    document.querySelectorAll('[data-lang-key]').forEach(el=>{const k=el.dataset.langKey;if(d[k]!=null)el.textContent=d[k];});
+    // Translate the structural labels without changing user-entered episode titles/descriptions.
+    document.querySelectorAll('.season-block summary').forEach((el)=>{const span=el.querySelector('.season-heading-text')||el;const m=span.textContent.match(/(?:Season|Temporada)\s+(\d+)/i);if(m)span.textContent=d.season+' '+m[1];});
+    document.querySelectorAll('.collection-title').forEach(el=>el.dataset.langReady='1');
+    document.querySelectorAll('[data-static-en]').forEach(el=>{const k=el.dataset.staticEn;if(d[k]!=null)el.textContent=d[k];});
+    // Re-render dynamic UI so season/collection/player labels use the selected language too.
+    if(typeof render==='function')render();
+    if(typeof renderCollections==='function')renderCollections();
+  }
+  // Better thumbnail encoding than the original 320px/70% path.
+  const tf=$('fThumbFile');if(tf)tf.addEventListener('change',ev=>{const file=ev.target.files[0];if(!file)return;const r=new FileReader();r.onload=()=>{const img=new Image();img.onload=()=>{const max=1280,scale=Math.min(1,max/img.width),c=document.createElement('canvas');c.width=Math.round(img.width*scale);c.height=Math.round(img.height*scale);const ctx=c.getContext('2d');ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';ctx.drawImage(img,0,0,c.width,c.height);pendingThumbDataUrl=c.toDataURL('image/jpeg',.92);clearThumbOnSave=false};img.src=r.result};r.readAsDataURL(file)});
+  // Hide empty episode placeholders; real episodes remain.
+  const st=document.createElement('style');st.textContent='.episode-empty{display:none!important}.collection-hidden{opacity:.55;filter:saturate(.7)}';document.head.appendChild(st);
+  // Reduce casual copying of source links from the public UI. This is only a UI deterrent;
+  // a browser must still receive a media URL to play it, so this cannot make the URL secret.
+  document.addEventListener('contextmenu', (ev) => {
+    if (ev.target.closest('.ep-card, .tile, .collection-card, .player-media, video, iframe')) {
+      ev.preventDefault();
+    }
+  }, {capture:true});
+  document.addEventListener('dragstart', (ev) => {
+    if (ev.target.closest('.ep-card, .tile, .collection-card, .player-media, video, iframe')) ev.preventDefault();
+  }, {capture:true});
+
+  // Hide the browser's download option where the native HTML5 media controls expose it.
+  document.addEventListener('loadedmetadata', (ev) => {
+    if (ev.target && ev.target.tagName === 'VIDEO') ev.target.setAttribute('controlsList','nodownload noremoteplayback');
+  }, true);
+
+  // Realtime sync for public viewers and other logged-in devices.
+  sb.channel('portfolio-state-live').on('postgres_changes',{event:'*',schema:'public',table:'portfolio_state',filter:'id=eq.main'},payload=>{if(payload.new&&payload.new.data){clearTimeout(saveTimer);applyState(payload.new.data);setStatus(isAdmin?'ADMIN • SYNCED':'CLOUD READY',true)}}).subscribe();
+  sb.auth.onAuthStateChange(()=>setTimeout(authRefresh,0));
+  const originalRender=window.render;window.render=function(){originalRender();renderCollections()};
+  collections=[];loadDecoration();applyDecoration();renderCollections();applyLanguage();authRefresh();
+})();
+</script></body>
+</html>
