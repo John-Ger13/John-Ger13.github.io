@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Reproductor ligero por URL</title>
+<style>
+:root{color-scheme:dark;--bg:#101318;--panel:#191e26;--line:#303846;--text:#eef2f7;--muted:#aab4c2;--accent:#69a7ff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}
+main{width:min(900px,100%);margin:auto;padding:16px}
+h1{font-size:1.35rem;margin:0 0 6px}
+p{margin:6px 0;color:var(--muted)}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;margin:14px 0}
+form{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+input{flex:1 1 260px;min-width:0;background:#0d1015;color:var(--text);border:1px solid #414b5b;border-radius:8px;padding:12px;font:inherit}
+button,.secondary{border:0;border-radius:8px;background:var(--accent);color:#07111f;padding:11px 15px;font:600 15px system-ui;cursor:pointer}
+.secondary{display:inline-block;background:#303b4b;color:var(--text);text-decoration:none;margin:4px 4px 0 0}
+button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid white;outline-offset:2px}
+#status{font-size:.92rem;overflow-wrap:anywhere}
+#stage{width:100%;aspect-ratio:16/9;background:#050607;border-radius:9px;overflow:hidden;display:grid;place-items:center}
+#stage video,#stage iframe{display:block;width:100%;height:100%;border:0;background:#000}
+#stage video{object-fit:contain}
+.placeholder{padding:20px;text-align:center;color:var(--muted)}
+.small{font-size:.88rem}
+details{margin-top:10px;color:var(--muted)}
+code{overflow-wrap:anywhere}
+@media(max-width:480px){main{padding:10px}.panel{padding:10px}button{flex:1}}
+</style>
+</head>
+<body>
+<main>
+  <h1>Reproductor ligero por URL</h1>
+  <p>Pega un enlace para intentar reproducirlo en esta misma página. Sin bibliotecas externas, anuncios propios ni miniaturas automáticas.</p>
+  <section class="panel">
+    <form id="urlForm">
+      <input id="urlInput" type="url" placeholder="https://..." aria-label="URL del video" autocomplete="url" required>
+      <button type="submit">Reproducir</button>
+    </form>
+    <p id="status" role="status" aria-live="polite">Esperando un enlace.</p>
+    <div id="stage"><div class="placeholder">El reproductor aparecerá aquí.</div></div>
+    <div id="links"></div>
+    <details>
+      <summary>Qué enlaces funcionan</summary>
+      <p>YouTube: videos normales, youtu.be y Shorts. Internet Archive: páginas /details/ y enlaces directos a archivos multimedia. También intenta Vimeo, Dailymotion y archivos de video directos como MP4 o WebM. Para otros sitios prueba el reproductor integrado del sitio.</p>
+      <p>Un enlace a una página web cualquiera no necesariamente es un enlace de video. Algunos sitios bloquean la reproducción integrada, requieren iniciar sesión o usan DRM. Este archivo no puede saltarse esas restricciones. Los enlaces HLS (.m3u8) dependen del navegador; Firefox/Chrome de escritorio pueden no reproducirlos de forma nativa.</p>
+    </details>
+  </section>
+  <section class="panel small">
+    <strong>Para equipos con 500 MB de RAM</strong>
+    <p>La página está diseñada para ser liviana: no carga frameworks ni imágenes de vista previa y no inicia videos automáticamente. Aun así, el video y el navegador consumen memoria; YouTube y otros reproductores modernos pueden ser demasiado pesados para equipos con tan poca RAM. Cierra otras pestañas y baja la calidad del video cuando sea posible.</p>
+  </section>
+</main>
+<script>
+(() => {
+  'use strict';
+  const form = document.getElementById('urlForm');
+  const input = document.getElementById('urlInput');
+  const stage = document.getElementById('stage');
+  const status = document.getElementById('status');
+  const links = document.getElementById('links');
+
+  function setStatus(message) { status.textContent = message; }
+  function addLink(label, url) {
+    const a = document.createElement('a');
+    a.className = 'secondary';
+    a.href = url; a.target = '_blank'; a.rel = 'noopener noreferrer';
+    a.textContent = label;
+    links.appendChild(a);
+  }
+  function validHttpUrl(value) {
+    const u = new URL(value);
+    if (u.protocol !== 'https:' && u.protocol !== 'http:') throw new Error('Solo se admiten enlaces HTTP o HTTPS.');
+    return u;
+  }
+  function showFrame(url, title, message) {
+    const frame = document.createElement('iframe');
+    frame.src = url;
+    frame.title = title;
+    frame.loading = 'lazy';
+    frame.referrerPolicy = 'strict-origin-when-cross-origin';
+    frame.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen';
+    frame.allowFullscreen = true;
+    stage.replaceChildren(frame);
+    setStatus(message);
+  }
+  function showVideo(url, message) {
+    const video = document.createElement('video');
+    video.controls = true;
+    video.preload = 'none';
+    video.playsInline = true;
+    video.src = url;
+    video.addEventListener('error', () => setStatus('No se pudo reproducir este archivo. Puede que el formato no sea compatible, el servidor bloquee el acceso o el enlace no sea directo.'));
+    stage.replaceChildren(video);
+    setStatus(message);
+  }
+  function play(raw) {
+    links.replaceChildren();
+    let u;
+    try { u = validHttpUrl(raw.trim()); }
+    catch (e) { setStatus(e.message || 'URL no válida.'); return; }
+    const host = u.hostname.toLowerCase().replace(/^www\./, '');
+    const path = u.pathname;
+    let id, embed;
+
+    // YouTube: watch, youtu.be, Shorts, live and embed links.
+    if (host === 'youtube.com' || host === 'm.youtube.com' || host === 'youtube-nocookie.com') {
+      id = u.searchParams.get('v');
+      if (!id) {
+        const m = path.match(/^\/(?:shorts|live|embed)\/([^/?]+)/);
+        if (m) id = m[1];
+      }
+      if (id) {
+        showFrame('https://www.youtube-nocookie.com/embed/' + encodeURIComponent(id), 'Video de YouTube', 'Reproductor de YouTube. La disponibilidad depende del video y de las políticas de inserción.');
+        return;
+      }
+    }
+    if (host === 'youtu.be') {
+      id = path.split('/').filter(Boolean)[0];
+      if (id) {
+        showFrame('https://www.youtube-nocookie.com/embed/' + encodeURIComponent(id), 'Video de YouTube', 'Reproductor de YouTube.');
+        return;
+      }
+    }
+
+    // Internet Archive item pages and embedded-player links.
+    if (host === 'archive.org' || host === 'www.archive.org') {
+      const m = path.match(/^\/(?:details|embed)\/([^/]+)/);
+      if (m) {
+        id = decodeURIComponent(m[1]);
+        showFrame('https://archive.org/embed/' + encodeURIComponent(id), 'Internet Archive', 'Reproductor de Internet Archive.');
+        addLink('Abrir en Internet Archive', 'https://archive.org/details/' + encodeURIComponent(id));
+        return;
+      }
+    }
+
+    // Vimeo.
+    if (host === 'vimeo.com' || host === 'player.vimeo.com') {
+      const m = path.match(/\/(?:video\/)?(\d+)/);
+      if (m) {
+        showFrame('https://player.vimeo.com/video/' + m[1], 'Video de Vimeo', 'Reproductor de Vimeo. Algunos videos privados o restringidos no se pueden insertar.');
+        return;
+      }
+    }
+
+    // Dailymotion.
+    if (host === 'dailymotion.com' || host === 'dai.ly') {
+      let m = path.match(/\/video\/([^_/?]+)/);
+      if (!m && host === 'dai.ly') m = path.match(/^\/([^/?]+)/);
+      if (m) {
+        showFrame('https://www.dailymotion.com/embed/video/' + encodeURIComponent(m[1]), 'Video de Dailymotion', 'Reproductor de Dailymotion.');
+        return;
+      }
+    }
+
+    // Direct video/audio files; no download or buffering until playback.
+    if (/\.(mp4|webm|ogv|ogg|mov|m4v|mp3|m4a|wav|m3u8|mpd)$/i.test(path)) {
+      showVideo(u.href, 'Intentando reproducir el archivo multimedia.');
+      return;
+    }
+
+    // Generic page fallback. Many sites prohibit iframe embedding.
+    showFrame(u.href, 'Página web enlazada', 'Intentando abrir el sitio dentro del reproductor. Si queda en blanco, el sitio probablemente bloquea la inserción; usa “Abrir enlace original”.');
+    addLink('Abrir enlace original', u.href);
+  }
+
+  form.addEventListener('submit', event => {
+    event.preventDefault();
+    play(input.value);
+  });
+  input.addEventListener('keydown', event => {
+    if (event.key === 'Escape') {
+      stage.replaceChildren(Object.assign(document.createElement('div'), {className:'placeholder', textContent:'El reproductor aparecerá aquí.'}));
+      links.replaceChildren();
+      setStatus('Reproductor limpiado.');
+    }
+  });
+})();
+</script>
+</body>
+</html>
