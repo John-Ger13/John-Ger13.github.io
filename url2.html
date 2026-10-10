@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#101318">
+<title>Reproductor Ultra Ligero</title>
+<style>
+:root{color-scheme:dark;--bg:#101318;--panel:#191e26;--line:#303846;--text:#eef2f7;--muted:#aab4c2;--accent:#80b4ff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}
+main{width:min(860px,100%);margin:auto;padding:12px}
+header{padding:5px 2px 10px}
+h1{font-size:1.3rem;line-height:1.2;margin:0 0 5px}
+p{margin:6px 0;color:var(--muted)}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;margin:10px 0}
+form{display:flex;gap:7px;margin:0 0 8px}
+input{flex:1;min-width:0;width:100%;background:#0d1015;color:var(--text);border:1px solid #414b5b;border-radius:8px;padding:11px;font:inherit}
+button,.linkbtn{border:1px solid #465367;border-radius:8px;background:#303b4b;color:var(--text);padding:9px 12px;font:600 14px system-ui;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
+button.primary{background:var(--accent);color:#07111f;border-color:transparent}
+button:disabled{opacity:.45;cursor:default}
+button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid white;outline-offset:2px}
+#status{font-size:.9rem;min-height:1.3em;overflow-wrap:anywhere}
+#stage{width:100%;aspect-ratio:16/9;max-height:72vh;background:#050607;border-radius:8px;overflow:hidden;display:grid;place-items:center}
+#stage video,#stage iframe{display:block;width:100%;height:100%;border:0;background:#000}
+#stage video{object-fit:contain}
+.placeholder{padding:18px;text-align:center;color:var(--muted)}
+.controls{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}
+.controls button{flex:1}
+.note{font-size:.83rem}
+details{margin-top:10px;color:var(--muted)}
+@media(max-width:520px){main{padding:8px}.panel{padding:9px}form{flex-wrap:wrap}form button{width:100%}.controls button{flex:1 1 30%}}
+</style>
+</head>
+<body>
+<main>
+<header>
+  <h1>Reproductor Ultra Ligero</h1>
+  <p>Pega una URL. Solo mantiene un reproductor activo y no precarga el video.</p>
+</header>
+<section class="panel">
+  <form id="urlForm">
+    <input id="urlInput" type="url" placeholder="Pega aquí el enlace https://..." aria-label="URL del video o página" autocomplete="url" required>
+    <button class="primary" type="submit">Abrir</button>
+  </form>
+  <div id="status" role="status" aria-live="polite">Listo. Pega un enlace para comenzar.</div>
+  <div id="stage"><div class="placeholder">El video aparecerá aquí.</div></div>
+  <div class="controls">
+    <button id="stopBtn" type="button" disabled>Detener y liberar memoria</button>
+    <button id="fullBtn" type="button" disabled>Pantalla completa</button>
+    <button id="openBtn" type="button" disabled>Abrir sitio original</button>
+  </div>
+  <details>
+    <summary>Compatibilidad y solución de errores</summary>
+    <p>Reconoce enlaces de YouTube, Internet Archive, Vimeo, Dailymotion y enlaces directos a archivos multimedia. Para otros sitios intenta mostrar la página integrada. En AnonMP4 prueba el enlace /embed/; si el sitio bloquea la inserción, utiliza “Abrir sitio original”.</p>
+    <p>No puede convertir cualquier página en un enlace directo de video ni saltarse inicios de sesión, bloqueos del servidor o DRM. Algunos formatos como HLS (.m3u8) no funcionan en todos los navegadores.</p>
+  </details>
+</section>
+<section class="panel note">
+  <strong>Modo de bajo consumo</strong>
+  <p>Sin frameworks, sin miniaturas, sin reproducción automática y sin precarga intencional. Al pulsar “Detener” se elimina el reproductor para ayudar a liberar memoria.</p>
+  <p>Con solo 500 MB de RAM, el navegador y el propio sitio de video pueden seguir siendo demasiado pesados. El HTML no puede reducir la memoria que consume un reproductor externo.</p>
+</section>
+</main>
+<script>
+(() => {
+  'use strict';
+  const form = document.getElementById('urlForm');
+  const input = document.getElementById('urlInput');
+  const stage = document.getElementById('stage');
+  const status = document.getElementById('status');
+  const stopBtn = document.getElementById('stopBtn');
+  const fullBtn = document.getElementById('fullBtn');
+  const openBtn = document.getElementById('openBtn');
+  let currentUrl = '';
+
+  const setStatus = text => { status.textContent = text; };
+  function resetStage(message = 'Reproductor detenido. Memoria del reproductor liberada en la medida que permite el navegador.') {
+    const old = stage.querySelector('iframe,video,audio');
+    if (old) {
+      old.pause?.();
+      if (old.tagName === 'VIDEO' || old.tagName === 'AUDIO') {
+        old.removeAttribute('src');
+        old.load();
+      } else {
+        old.src = 'about:blank';
+      }
+      old.remove();
+    }
+    const placeholder = document.createElement('div');
+    placeholder.className = 'placeholder';
+    placeholder.textContent = 'El video aparecerá aquí.';
+    stage.replaceChildren(placeholder);
+    stopBtn.disabled = true;
+    fullBtn.disabled = true;
+    currentUrl = '';
+    openBtn.disabled = true;
+    setStatus(message);
+  }
+  function prepare(url) {
+    // Stop and detach the old player before creating another one.
+    const old = stage.querySelector('iframe,video,audio');
+    if (old) {
+      old.pause?.();
+      if (old.tagName === 'VIDEO' || old.tagName === 'AUDIO') {
+        old.removeAttribute('src'); old.load();
+      } else old.src = 'about:blank';
+      old.remove();
+    }
+    currentUrl = url;
+    stopBtn.disabled = false;
+    fullBtn.disabled = false;
+    openBtn.disabled = false;
+  }
+  function showFrame(url, title, message, originalUrl) {
+    prepare(originalUrl || url);
+    const frame = document.createElement('iframe');
+    frame.src = url;
+    frame.title = title;
+    frame.loading = 'lazy';
+    frame.referrerPolicy = 'strict-origin-when-cross-origin';
+    frame.allow = 'encrypted-media; picture-in-picture; fullscreen';
+    frame.allowFullscreen = true;
+    stage.replaceChildren(frame);
+    setStatus(message);
+  }
+  function showVideo(url, message) {
+    prepare(url);
+    const video = document.createElement('video');
+    video.controls = true;
+    video.preload = 'none';
+    video.playsInline = true;
+    video.disablePictureInPicture = false;
+    video.addEventListener('error', () => setStatus('No se pudo reproducir. El enlace quizá no sea directo, el formato no sea compatible o el servidor bloquee el acceso.'));
+    stage.replaceChildren(video);
+    video.src = url;
+    setStatus(message);
+  }
+  function httpUrl(raw) {
+    const u = new URL(raw.trim());
+    if (u.protocol !== 'https:' && u.protocol !== 'http:') throw new Error('Solo se admiten enlaces HTTP o HTTPS.');
+    return u;
+  }
+  function play(raw) {
+    let u;
+    try { u = httpUrl(raw); }
+    catch (e) { setStatus(e.message || 'URL no válida.'); return; }
+    const host = u.hostname.toLowerCase().replace(/^www\./, '');
+    const path = u.pathname;
+    let id, m;
+
+    if (host === 'youtube.com' || host === 'm.youtube.com' || host === 'youtube-nocookie.com') {
+      id = u.searchParams.get('v');
+      if (!id && (m = path.match(/^\/(?:shorts|live|embed)\/([^/?]+)/))) id = m[1];
+      if (id) return showFrame('https://www.youtube-nocookie.com/embed/' + encodeURIComponent(id), 'Video de YouTube', 'Video de YouTube. La inserción puede estar desactivada por el propietario.', u.href);
+    }
+    if (host === 'youtu.be') {
+      id = path.split('/').filter(Boolean)[0];
+      if (id) return showFrame('https://www.youtube-nocookie.com/embed/' + encodeURIComponent(id), 'Video de YouTube', 'Video de YouTube.', u.href);
+    }
+    if (host === 'archive.org') {
+      m = path.match(/^\/(?:details|embed)\/([^/]+)/);
+      if (m) {
+        id = decodeURIComponent(m[1]);
+        return showFrame('https://archive.org/embed/' + encodeURIComponent(id), 'Internet Archive', 'Reproductor de Internet Archive.', 'https://archive.org/details/' + encodeURIComponent(id));
+      }
+    }
+    if (host === 'vimeo.com' || host === 'player.vimeo.com') {
+      m = path.match(/\/(?:video\/)?(\d+)/);
+      if (m) return showFrame('https://player.vimeo.com/video/' + m[1], 'Video de Vimeo', 'Reproductor de Vimeo. Los videos privados pueden estar restringidos.', u.href);
+    }
+    if (host === 'dailymotion.com' || host === 'dai.ly') {
+      m = path.match(/\/video\/([^_/?]+)/);
+      if (!m && host === 'dai.ly') m = path.match(/^\/([^/?]+)/);
+      if (m) return showFrame('https://www.dailymotion.com/embed/video/' + encodeURIComponent(m[1]), 'Video de Dailymotion', 'Reproductor de Dailymotion.', u.href);
+    }
+    // AnonMP4 embed-style URL: try the provided embed endpoint first.
+    if (host === 'anonmp4.art') {
+      m = path.match(/^\/(?:v|embed)\/([^/?]+)/);
+      if (m) {
+        const videoId = encodeURIComponent(m[1]);
+        return showFrame('https://anonmp4.art/embed/' + videoId, 'Video de AnonMP4', 'Intentando abrir el reproductor integrado de AnonMP4. Si aparece un error, usa “Abrir sitio original”.', 'https://anonmp4.art/v/' + videoId);
+      }
+    }
+    if (/\.(mp4|webm|ogv|ogg|mov|m4v|mp3|m4a|wav|m3u8|mpd)$/i.test(path)) {
+      return showVideo(u.href, 'Intentando reproducir el archivo multimedia sin precargarlo.');
+    }
+    return showFrame(u.href, 'Página web enlazada', 'Intentando abrir el sitio. Si queda en blanco o da error, el sitio puede bloquear la inserción; prueba “Abrir sitio original”.', u.href);
+  }
+
+  form.addEventListener('submit', event => { event.preventDefault(); play(input.value); });
+  stopBtn.addEventListener('click', () => resetStage());
+  fullBtn.addEventListener('click', async () => {
+    try {
+      if (document.fullscreenElement) await document.exitFullscreen();
+      else await stage.requestFullscreen();
+    } catch (_) { setStatus('El navegador no permitió activar pantalla completa.'); }
+  });
+  openBtn.addEventListener('click', () => {
+    if (currentUrl) window.open(currentUrl, '_blank', 'noopener,noreferrer');
+  });
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && document.fullscreenElement) document.exitFullscreen?.();
+  });
+})();
+</script>
+</body>
+</html>
