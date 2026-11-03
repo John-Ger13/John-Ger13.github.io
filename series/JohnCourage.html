@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
   <meta name="description" content="John Courage: catálogo de episodios y colecciones de Coraje el perro cobarde." />
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>John Courage</title>
+<title>John Courage — Coraje el perro cobarde</title>
 <meta name="jc-version" content="john-courage-2026-10">
 <!-- FFmpeg is loaded only when the audio+video combine tool is actually used. -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -614,7 +614,7 @@ body.player-open #player video{display:block;width:100%;height:auto;}
 <div id="rowsWrap"></div>
 
 <div id="emptyState" class="empty" style="display:none;">
-  <p>Loading, please wait.</p>
+  <p>Your channel is empty so far.</p>
   <a href="#agregar" class="btn admin-only">+ Add your first show</a>
 </div>
 
@@ -699,9 +699,9 @@ body.player-open #player video{display:block;width:100%;height:auto;}
           <input type="text" id="fLang1" placeholder="Spanish" value="Spanish">
         </div>
         <div class="field">
-          <label for="fUrl1">Video/photo link (VidShared, Cloudinary, R2, Drive, Google Photos, OneDrive, Dropbox, YouTube, Vimeo)</label>
+          <label for="fUrl1">Video/photo link (Sendvid, VidShared, Cloudinary, R2, Drive, Google Photos, OneDrive, Dropbox, YouTube, Vimeo)</label>
           <input type="url" id="fUrl1" required placeholder="https://player.cloudinary.com/embed/?cloud_name=dd637h4x&public_id=Los_Simpsons_S3_E1">
-          <small style="display:block;margin-top:6px;color:var(--muted);">VidShared: pega el enlace del reproductor, por ejemplo https://vsembed.com/xxxx. Google Drive: pega el enlace compartido normal. Google Photos: pega el enlace compartido; la página mostrará un botón para abrirlo en Google Photos.</small>
+          <small style="display:block;margin-top:6px;color:var(--muted);">Sendvid: pega el enlace normal, por ejemplo https://sendvid.com/xxxx. VidShared: pega el enlace del reproductor, por ejemplo https://vsembed.com/xxxx. Google Drive: pega el enlace compartido normal. Google Photos: pega el enlace compartido; la página mostrará un botón para abrirlo en Google Photos.</small>
         </div>
       </div>
       <div class="field">
@@ -1061,6 +1061,17 @@ function parseVideoUrl(raw){
     if (u.hostname === 'vsembed.com' || u.hostname.endsWith('.vsembed.com')){
       return { type:'vidshared', provider:'vidshared', embed:u.toString(), thumb:null };
     }
+    // Sendvid share links use /VIDEO_ID; its embeddable player uses /embed/VIDEO_ID.
+    if (u.hostname === 'sendvid.com' || u.hostname.endsWith('.sendvid.com')){
+      const id = u.pathname.split('/').filter(Boolean)[0];
+      if (id && id !== 'embed' && /^[a-zA-Z0-9_-]+$/.test(id)){
+        return { type:'sendvid', provider:'sendvid', embed:`https://sendvid.com/embed/${encodeURIComponent(id)}`, thumb:null };
+      }
+      if (id === 'embed' && u.pathname.split('/').filter(Boolean)[1]){
+        const embedId = u.pathname.split('/').filter(Boolean)[1];
+        return { type:'sendvid', provider:'sendvid', embed:`https://sendvid.com/embed/${encodeURIComponent(embedId)}`, thumb:null };
+      }
+    }
     let ytId = null;
     if (u.hostname.includes('youtu.be')) ytId = u.pathname.slice(1);
     else if (u.hostname.includes('youtube.com')){
@@ -1134,6 +1145,9 @@ function mediaHtml(info, autoplay){
   }
   if (info.type === 'vidshared'){
     return `<iframe class="vidshared-player-frame" src="${escapeHtml(info.embed)}" allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowfullscreen loading="eager" referrerpolicy="no-referrer-when-downgrade" title="Reproductor de VidShared"></iframe>`;
+  }
+  if (info.type === 'sendvid'){
+    return `<iframe class="vidshared-player-frame" src="${escapeHtml(info.embed)}" allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowfullscreen loading="eager" referrerpolicy="no-referrer-when-downgrade" title="Reproductor de Sendvid"></iframe>`;
   }
   if (info.type === 'youtube'){
     return `<iframe src="${info.embed}${autoplay?'?autoplay=1':''}" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen title="reproductor de video"></iframe>`;
@@ -2009,15 +2023,15 @@ function openPlayer(idx, randomFlow){
       const oldTime = (vjsPlayer && typeof vjsPlayer.currentTime === 'function') ? (vjsPlayer.currentTime() || 0) : 0;
       const wasPlaying = vjsPlayer ? !vjsPlayer.paused() : true;
 
-      if (info2.type === 'cloudinary' || info2.type === 'drive' || info2.type === 'vidshared'){
+      if (info2.type === 'cloudinary' || info2.type === 'drive' || info2.type === 'vidshared' || info2.type === 'sendvid'){
         clearMediaKeepClose();
         mediaBox.classList.add('drive-media');
         const frame = document.createElement('iframe');
-        frame.className = info2.type === 'cloudinary' ? 'cloudinary-player-frame' : (info2.type === 'vidshared' ? 'vidshared-player-frame' : 'drive-player-frame');
+        frame.className = info2.type === 'cloudinary' ? 'cloudinary-player-frame' : ((info2.type === 'vidshared' || info2.type === 'sendvid') ? 'vidshared-player-frame' : 'drive-player-frame');
         frame.src = info2.drivePreview || info2.embed;
         frame.setAttribute('allow', 'autoplay; fullscreen; picture-in-picture; encrypted-media');
         frame.setAttribute('allowfullscreen', '');
-        frame.setAttribute('title', info2.type === 'cloudinary' ? 'Reproductor de video de Cloudinary' : (info2.type === 'vidshared' ? 'Reproductor de VidShared' : 'Reproductor de video de Google Drive'));
+        frame.setAttribute('title', info2.type === 'cloudinary' ? 'Reproductor de video de Cloudinary' : ((info2.type === 'vidshared') ? 'Reproductor de VidShared' : (info2.type === 'sendvid' ? 'Reproductor de Sendvid' : 'Reproductor de video de Google Drive')));
         frame.setAttribute('referrerpolicy', 'no-referrer-when-downgrade');
         mediaBox.appendChild(frame);
       } else if (info2.type === 'direct'){
@@ -2098,6 +2112,18 @@ function openPlayer(idx, randomFlow){
     frame.setAttribute('loading', 'eager');
     mediaBox.appendChild(frame);
     document.getElementById('offlineBarWrap').innerHTML = '<span style="font-family:Space Mono,monospace;font-size:.72rem;color:var(--muted);">VidShared embedded playback</span>';
+  } else if (firstInfo.type === 'sendvid'){
+    mediaBox.classList.add('drive-media');
+    const frame = document.createElement('iframe');
+    frame.className = 'vidshared-player-frame';
+    frame.src = firstInfo.embed;
+    frame.setAttribute('allow', 'autoplay; fullscreen; picture-in-picture; encrypted-media');
+    frame.setAttribute('allowfullscreen', '');
+    frame.setAttribute('title', 'Reproductor de Sendvid');
+    frame.setAttribute('referrerpolicy', 'no-referrer-when-downgrade');
+    frame.setAttribute('loading', 'eager');
+    mediaBox.appendChild(frame);
+    document.getElementById('offlineBarWrap').innerHTML = '<span style="font-family:Space Mono,monospace;font-size:.72rem;color:var(--muted);">Sendvid embedded playback</span>';
   } else if (firstInfo.type === 'cloudinary'){
     mediaBox.classList.add('drive-media');
     const frame = document.createElement('iframe');
@@ -2791,12 +2817,6 @@ loadEntries();
   setTimeout(registerVisit,3000);
 })();
 </script>
-
-</body>
-</html>
-body>
-</html>
-ipt>
 
 </body>
 </html>
