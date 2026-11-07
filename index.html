@@ -1,0 +1,194 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Project John</title>
+
+<style>
+body  {
+     background-color: #152425;
+     color: #bfc8c9;
+     font-family: sans-serif;
+}
+ .title  {
+     color: #cf6302;
+     font-size: 3rem;
+     font-weight: 800;
+     letter-spacing: 5px;
+     border-bottom: 3px solid #cf6302;
+     display: inline-block;
+}
+ .subtitle  {
+     display: inline-block;
+     background-color: #222e2e;
+     border-radius: 4px;
+     padding: 4px 10px;
+}
+ .section-title  {
+     font-size: 1.8rem;
+     color: #cf6302;
+     border-bottom: 2px solid #cf6302;
+     display: inline-block;
+     margin: 2rem 0 1rem;
+}
+ .marco  {
+     border: 1px solid #000000;
+     padding: 10px 10px 10px 9px;
+     margin-top: 20px;
+
+}
+ .note  {
+     margin-top: -13px;
+     color: #bfc8c9;
+     font-size: 19px;
+     font-weight: 700;
+     line-height: 1.4;
+    
+}
+ .navbar {
+     margin: 9px;
+     display: flex;
+     justify-content: center;
+     gap: 10px;
+}
+ .navbar a  {
+     color: #8fbfbf;
+     font-weight: 700;
+     padding: 10px 15px;
+     font-size: 25px;
+     text-decoration: none;
+     border-bottom: 2px solid transparent;
+}
+ .navbar a:hover  {
+     color: #cf6302;
+     border-bottom-color: #cf6302;
+}
+ ::selection {
+    background-color: #034c6c;
+    color: #d8c9c6;
+}
+  section + section {
+  border-top: 2px solid #2c3a3a;
+  padding-top: 2rem;
+  margin-top: 2rem;
+}
+ .card  {
+    margin-top: 20px;
+    max-width: 200px;
+    display: block;
+    flex: 1 1 150px;
+    text-decoration: none;
+    background-color: #222e2e;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: transform 0.2s;
+}
+ .card-contenedor  {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    justify-content: center;
+}
+ .card:hover  {
+    transform: translateY(-3px);
+}
+ .card img  {
+    width: 100%;
+    display: block;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+}
+ .card-title  {
+    display: block;
+    padding: 10px;
+    color: #bfc8c9;
+    font-weight: 700;
+    text-align: center;
+}
+ .card-title .beta {
+    font-size: 15px;
+    font-weight: 400;
+    color: #bfc8c9;
+    letter-spacing: 1px;
+    display: block;
+}
+ .card:hover .card-title  {
+    color: #cf6302;
+}
+ footer {
+    text-align: center;
+    padding: 20px;
+    margin-top: 40px;
+    color: #8a9a9b;
+    font-size: 14px;
+}
+</style>
+</head>
+<body>
+ <header>
+  <nav class="navbar">
+     <a href="#inicio">Inicio</a>
+     <a href="#series">Series</a>  
+     <a href="#juegos">Juegos</a>
+  </nav>
+ </header>
+<main>
+ <section id="inicio">
+   <h1 class="title">Project John</h1>
+     <div class="marco">
+         <h2 class="subtitle">Acerca John:</h2>
+       <p class="note">
+          Es un Projecto que busca organizar links de sitios Webs y reproducirlos mediante Links.
+          Project John NO ALMACENA episodios y NO posee los derechos de autor de ninguna de las series, peliculas, entre otros.
+       </p>
+       <p class="note">
+          Todos los episodios de Series, Peliculas y otros, son Links tomados de INTERNET ARCHIVER y otros sitios.
+          Si eliminan o remueven un episodio o pelicula de ARCHIVER, dejara de estar disponible en su respectivo organizador o biblioteca de John.
+       </p>
+       <p class="note">
+          Project John Solo Organiza y trata de facilitar el acceso.
+          PROJECT JOHN NO POSEE LOS DERECHOS DE AUTOR DE NINGUNA de las SERIES, PELICULAS, ENTRE OTROS MEDIOS QUE ORGANIZA, solo es una biblioteca online que ordena links de medios subidos por usuarios a INTERNET ARCHIVER.
+          John NO ALMACENA episodios de series ni peliculas, solo es un organizador y reproductor por Links.
+       </p>
+        <!-- Courage the Cowardly Dog -->
+     </div>
+</section>
+<section id="series">
+      <h2 class="section-title">Series</h2>
+     <div class="card-contenedor">
+       <a href="https://john-ger13.github.io/JohnSpringfield" class="card">
+          <img src="https://imgs.search.brave.com/e08oWMCR7Eo4-DqwX6le8xEFh63Go7DJMepV07MEsog/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9kaXNu/ZXkuaW1hZ2VzLmVk/Z2UuYmFtZ3JpZC5j/b20vcmlwY3V0LWRl/bGl2ZXJ5L3YyL3Zh/cmlhbnQvZGlzbmV5/LzExRTFFQ0U3NUJC/MTMzMEE3QTEwQzEz/NjNGOUZDQkVGQ0E2/MzFDMUI2OTA5MkJC/RTgyMEM3RkQxRjlD/QjMzM0YvY29tcG9z/ZT9mb3JtYXQ9d2Vi/cCZ3aWR0aD0yNTYw" alt="Ver Los Simpsons">
+          <span class="card-title">
+            <span class="beta">(BETA)</span>
+            Los Simpson
+          </span>
+            <!-- add The Simpsons Movie -->
+       </a>
+       <a href="https://john-ger13.github.io/Series/JohnCourage" class="card">
+          <img src="https://imgs.search.brave.com/heynivVPxClLsAhscRViKrEOBJNIp5tFH-yI3fcVJr4/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9pLnBp/bmltZy5jb20vb3Jp/Z2luYWxzL2Q5L2Yz/L2E5L2Q5ZjNhOWIw/NDMxYjQ3ZGE0Mzc4/YjFlN2NmNmUxYjlk/LmpwZw" alt="imagen de coraje el perro cobarde">
+          <span class="card-title">
+            <span class="beta">(BETA)</span>
+            Coraje el Perro Cobarde
+          </span>
+       </a>
+     </div>
+</section>
+ <section id="juegos">
+    <h2 class="section-title">Juegos</h2>
+     <div class="card-contenedor">
+       <a href="john-ger13.github.io/Juegos/Fnaf-1/1Fnaf-1" class="card">
+          <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse3.mm.bing.net%2Fth%2Fid%2FOIP.68SblHoDPHe3Avty0zSFkgHaFj%3Fr%3D0%26pid%3DApi&f=1&ipt=ac8a97aa1f696584d444794e5905841abe581d9464becef91ae2eaa8fdc03506&ipo=images" alt="Portada del juego Five nights at Freddy's">
+          <span class="card-title">
+            <span class="beta">Beta</span>
+            Five Nights At Freddy's
+          </span>
+       </a>
+     </div>
+ </section>
+</main>
+   <footer>
+      <p>Project John © 2026</p>
+   </footer>
+</body>
+</html>
