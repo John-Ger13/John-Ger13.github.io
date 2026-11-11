@@ -1,0 +1,192 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>JohnArcade - The Simpsons Game</title>
+
+<style>
+body {
+     background-color: #152425;
+     color: #bfc8c9;
+     font-family: sans-serif;
+     font-size: 17px;
+}
+ .navbar {
+     margin: 9px;
+     display: flex;
+     justify-content: center;
+     gap: 10px;
+}
+ .navbar a  {
+     color: #8fbfbf;
+     font-weight: 700;
+     padding: 10px 15px;
+     font-size: 25px;
+     text-decoration: none;
+     border-bottom: 2px solid transparent;
+}
+ .navbar a:hover  {
+     color: #cf6302;
+     border-bottom-color: #cf6302;
+}
+ .title  {
+     display: inline-block;
+     color: #cf6302;
+     border-bottom: 3px solid #cf6302;
+}
+ .card-container  {
+     display: flex;
+     flex-direction: column;
+     gap: 0.8rem;
+     max-width: 360px;
+     margin: 0 auto;
+     padding: 1.7rem;
+     background-color: #1c1c1e;
+     border: 1px solid #2e3134;
+     border-radius: 9px;
+}
+ .card-portada  {
+     width: 100%;
+     display: block;
+     border-radius: 6px;
+}
+ .card-title  {
+     margin: 0;
+     color: #e8e0d5;
+     font-size: 1.4rem;
+     text-align: center;
+}
+ .card-boton  {
+     display: block;
+     text-align: center;
+     padding: .5rem 1rem;
+     font-weight: 700;
+     text-decoration: none;
+     border-radius: 6px;
+     transition: background 0.2s;
+}
+ .card-boton.mediafire  {
+     background-color: #0055a4;
+     color: #fff;
+}
+ .card-boton.drive  {
+     background-color: #4285F4;
+     color: #fff;
+}
+ .boton-icono  {
+     width: 20px;
+     height: 20px;
+     flex-shrink: 0;
+     fill: currentColor;
+}
+ .card-boton.mega  {
+     background-color: #d9272e;
+     color: #fff; 
+}
+ .card-captura  {
+     display: flex;
+     gap: 0.5rem;
+     overflow-x: auto;
+     scroll-snap-type: x mandatory;
+     padding-bottom: 0.5rem;
+}
+ .card-captura img  {
+     flex: 0 0 auto;
+     width: 85%;
+     max-width: 320px;
+     height: auto;
+     border-radius: 6px;
+     scroll-snap-align: start;
+     object-fit: cover;
+}
+ .card-description  {
+     font-size: 1.1rem;
+     line-height: 1.6;
+     color: #a9a5a4;
+}
+ ::selection {
+     background-color: #034c6c;
+     color: #d8c9c6;
+}
+ .card-section  {
+     margin: 1rem 0 0.3rem;
+     font-size: 0.9rem;
+     font-weight: 700;
+     text-transform: uppercase;
+     letter-spacing: 1px;
+     color: #cf6302;
+}
+  footer {
+     text-align: center;
+     padding: 20px;
+     margin-top: 40px;
+     color: #8a9a9b;
+     font-size: 14px;
+}
+</style>
+</head>
+<body>
+<header>
+   <nav class="navbar">
+      <a href="Link to Inicio">Inicio</a>
+   </nav>
+</header>
+<main>
+   <section>
+        <h1 class="title">JohnArcade - The Simpsons Game (psp emulador)</h1>
+       <div class="card-container">
+         <img class="card-portada" src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse2.mm.bing.net%2Fth%2Fid%2FOIP.uhF3jTezg-ZC4B-9uSxwGwHaMx%3Fr%3D0%26pid%3DApi&amp;f=1&amp;ipt=cb9357ff03cb0cb24b80193e275ed4b552ded921c5a35941e88c01f1167773c7&amp;ipo=images" alt="Portada del juego The Simpsons Game">
+          <h3 class="card-title">The Simpsons Game PPSSPP</h3>
+            <a class="card-boton drive" href="ADD LINK" target="_blank" rel="noopener">
+               <svg class="boton-icono" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                 <path d="M12.01 1.485c-2.082 0-3.754.02-3.743.047.01.02 1.708 3.001 3.774 6.62l3.76 6.574h3.76c2.081 0 3.753-.02 3.742-.047-.005-.02-1.708-3.001-3.775-6.62l-3.76-6.574zm-4.76 1.73a789.828 789.861 0 0 0-3.63 6.319L0 15.868l1.89 3.298 1.885 3.297 3.62-6.335 3.618-6.33-1.88-3.287C8.1 4.704 7.255 3.22 7.25 3.214zm2.259 12.653-.203.348c-.114.198-.96 1.672-1.88 3.287a423.93 423.948 0 0 1-1.698 2.97c-.01.026 3.24.042 7.222.042h7.244l1.796-3.157c.992-1.734 1.85-3.23 1.906-3.323l.104-.167h-7.249z"/>
+               </svg>
+               Drive
+            </a>
+                 <!-- Add links -->
+            <a class="card-boton mediafire" href="ADD LINK" target="_blank" rel="noopener">
+               <svg class="boton-icono" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                 <path d="M11.13 7.171c-.496.42 2.943-.458 2.6 1.239-.332 1.633-3.62-.343-7.223-.176-1.594.073-3.054.53-3.985 1.668.973-1.108 2.901-.844 2.398-.081-1.172 1.776-3.376.497-4.92 3.975.185-.4.685-1.196 2.843-1.526 1.586-.242 4.214-.016 5.054 1.297.924 1.444-3.759 1.28-1.167 1.573 3.593.406 6.299 3.31 9.813 3.311 4.55 0 7.422-2.324 7.457-6.146.063-6.923-9.101-8.318-12.87-5.134zm6.768 7.554c-1.195-.033-2.404-.512-3.364-.98-2.365-1.155-3.338-1.553-3.338-1.608 0-.067 1.42.484 3.813-.789 1.383-.735 1.432-1.377 2.89-1.505 1.73-.152 2.962 1.13 2.962 2.478 0 1.349-1.222 2.453-2.963 2.404z"/>
+               </svg>
+               MediaFire
+            </a>
+            <a class="card-boton mega" href="ADD LINK" target="_blank" rel="noopener">
+              <svg class="boton-icono" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M12 0C5.372 0 0 5.372 0 12s5.372 12 12 12 12-5.372 12-12S18.628 0 12 0zm6.23 16.244a.371.371 0 0 1-.373.372H16.29a.371.371 0 0 1-.372-.372v-4.828c0-.04-.046-.06-.08-.033l-3.32 3.32a.742.742 0 0 1-1.043 0l-3.32-3.32c-.027-.027-.08-.007-.08.033v4.828a.371.371 0 0 1-.372.372H6.136a.371.371 0 0 1-.372-.372V7.757c0-.206.166-.372.372-.372h1.076a.75.75 0 0 1 .525.22l4.13 4.13a.18.18 0 0 0 .26 0l4.13-4.13c.14-.14.325-.22.525-.22h1.075c.206 0 .372.166.372.372z"/>
+              </svg>
+              Mega
+            </a>
+              <p class="card-section">Capturas</p>
+            <div class="card-captura">
+              <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse2.mm.bing.net%2Fth%2Fid%2FOIP.yBmHja2KkjqAnVxiiJSy4AHaEK%3Fr%3D0%26pid%3DApi&amp;f=1&amp;ipt=fb7e61a16a25c2238aa30c065caf4fdae0b8cb576c7195f5031f2495113e3dee&amp;ipo=images" alt="Captura 1 de The Simpsons Game">
+              <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse2.mm.bing.net%2Fth%2Fid%2FOIP.zx41Xk8HxRZQKCdtyaAFpAHaDg%3Fr%3D0%26pid%3DApi&amp;f=1&amp;ipt=98886f971e231f3dc998072727757061320082fce1a21bb34b5fc21f27d21640&amp;ipo=images" alt="Captura 2 de The Simpsons Game">
+              <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse2.mm.bing.net%2Fth%2Fid%2FOIP.YKMF_9U60EzKHBRVQb1vwQHaDV%3Fr%3D0%26pid%3DApi&amp;f=1&amp;ipt=b7ac5bcb2fbebe90a1086d8e9b34a51f2ccf96008d855c76d47b1a5c842256c6&amp;ipo=images" alt="Captura 3 de The Simpsons Game">
+              <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse3.mm.bing.net%2Fth%2Fid%2FOIP.Onl7xCvMmTD2LKVu9lpYWwHaDV%3Fr%3D0%26pid%3DApi&amp;f=1&amp;ipt=450214e206454c159d2286ec4b36b3d58b5363b48eae5d4ca591db2c04917b30&amp;ipo=images" alt="Captura 4 de The Simpsosn Game">
+              <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse2.mm.bing.net%2Fth%2Fid%2FOIP.QJsE-oR-glo10AxiPQy_zgHaDa%3Fr%3D0%26pid%3DApi&amp;f=1&amp;ipt=df7056460d36bc80f7f45b879ca8d9bd7f9a9645c70f5abb6b4ae29d9f05ef84&amp;ipo=images" alt="Captura 5 de The Simpsons Game">
+            </div>
+              <p class="card-section">Descripcion</p>
+            <div class="card-description">
+              <p>
+                 El juego de Los Simpson es un juego de plataformas de 2007 basado en la serie de animación de televisión "Los Simpson", creada para Nintendo DS, Wii, Xbox 360, PlayStation 2, PlayStation 3 y PlayStation Portable "PSP".
+                 El juego fue desarrollado por EA Redwood Shores y publicado por Electronic Arts. Se lanzó en Norteamérica en octubre de 2007 y en todo el mundo en noviembre de 2007, pocos meses después de La película de Los Simpson.
+              </p>
+              <p>
+                  El juego sigue a los cinco miembros de la familia
+                  Simpson: Homero, Marge, Bart, Lisa y Maggie que descubren que forman parte de un videojuego y reciben superpoderes para resolver varias situaciones.
+              </p>
+              <p>
+                  Finalmente, deben salvar a sus predecesores de 8 bits de Will Wright y del creador de sus personajes de videojuego, Matt Groening.
+              </p>
+              <p>
+                  La familia viaja a cuatro escenarios con parodias de otros juegos para recoger tarjetas clave usadas para infiltrarse en la mansión de su creador y, en última instancia, salvar a sus predecesores de la destrucción y así revertir la prohibición generacional de los videojuegos.
+              </p>
+            </div>
+       </div>
+   </section>
+</main>
+   <footer>
+      <p>Project John © 2026</p>
+   </footer>
+</body>
+</html>
